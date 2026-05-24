@@ -14,6 +14,7 @@ import { Route as OtpRouteImport } from './routes/otp'
 import { Route as NewGroupRouteImport } from './routes/new-group'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 
@@ -42,6 +43,11 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactsRoute = ContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,6 +61,7 @@ const ChatIdRoute = ChatIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/new-group': typeof NewGroupRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/new-group': typeof NewGroupRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/new-group': typeof NewGroupRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contacts'
     | '/home'
     | '/login'
     | '/new-group'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contacts'
     | '/home'
     | '/login'
     | '/new-group'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/contacts'
     | '/home'
     | '/login'
     | '/new-group'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ContactsRoute: typeof ContactsRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
   NewGroupRoute: typeof NewGroupRoute
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contacts': {
+      id: '/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof ContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ContactsRoute: ContactsRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
   NewGroupRoute: NewGroupRoute,
@@ -187,3 +208,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
