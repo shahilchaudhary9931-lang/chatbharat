@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { Avatar } from "@/components/Avatar";
@@ -16,6 +16,9 @@ function Profile() {
   const [phone, setPhone] = useState("");
   const [about, setAbout] = useState("");
   const [editName, setEditName] = useState(false);
+  const [savedPhoto, setSavedPhoto] = useState<string | null>(null);
+  const [pendingPhoto, setPendingPhoto] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setPhone(localStorage.getItem("cw_phone") || "");
@@ -24,6 +27,7 @@ function Profile() {
       try { const o = JSON.parse(u); if (o.name) setName(o.name); } catch {}
     }
     setAbout(localStorage.getItem("cw_about") || t("aboutDefault"));
+    setSavedPhoto(localStorage.getItem("cw_avatar"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -32,10 +36,37 @@ function Profile() {
     localStorage.setItem("cw_user", JSON.stringify({ name, phone }));
   };
 
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPendingPhoto(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(file);
+  };
+
+  const savePhoto = () => {
+    if (!pendingPhoto) return;
+    localStorage.setItem("cw_avatar", pendingPhoto);
+    setSavedPhoto(pendingPhoto);
+    setPendingPhoto(null);
+  };
+
+  const cancelPhoto = () => setPendingPhoto(null);
+
+  const removePhoto = () => {
+    localStorage.removeItem("cw_avatar");
+    setSavedPhoto(null);
+    setPendingPhoto(null);
+  };
+
   const logout = () => {
     localStorage.removeItem("cw_user");
     navigate({ to: "/login" });
   };
+
+  const displayPhoto = pendingPhoto ?? savedPhoto;
+  const removeLabel = lang === "hi" ? "फ़ोटो हटाएँ" : "Remove photo";
+  const saveLabel = lang === "hi" ? "सेव करें" : "Save";
 
   return (
     <div className="min-h-screen bg-background pb-10">
@@ -52,15 +83,48 @@ function Profile() {
       {/* Avatar */}
       <div className="flex flex-col items-center pt-8 pb-6">
         <div className="relative">
-          <Avatar name={name} hue={170} size={120} />
+          {displayPhoto ? (
+            <img
+              src={displayPhoto}
+              alt="Profile"
+              className="w-[120px] h-[120px] rounded-full object-cover ring-4 ring-card shadow"
+            />
+          ) : (
+            <Avatar name={name} hue={170} size={120} />
+          )}
           <button
+            onClick={() => fileRef.current?.click()}
             className="absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg"
             style={{ background: "var(--color-primary)" }}
             aria-label="change photo"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 19V8a2 2 0 0 0-2-2h-3.2l-1.4-2H7.6L6.2 6H3a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2Z"/><circle cx="12" cy="13" r="4" fill="var(--color-primary)"/></svg>
           </button>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickFile} />
         </div>
+
+        {pendingPhoto && (
+          <div className="flex gap-2 mt-4 animate-[bubble-in_.2s_ease-out]">
+            <button
+              onClick={cancelPhoto}
+              className="px-4 py-2 rounded-full text-sm font-semibold border border-border hover:bg-muted"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              onClick={savePhoto}
+              className="px-5 py-2 rounded-full text-sm font-semibold text-white shadow"
+              style={{ background: "var(--color-primary)" }}
+            >
+              {saveLabel}
+            </button>
+          </div>
+        )}
+        {!pendingPhoto && savedPhoto && (
+          <button onClick={removePhoto} className="mt-3 text-xs text-destructive hover:underline">
+            {removeLabel}
+          </button>
+        )}
       </div>
 
       {/* Fields */}

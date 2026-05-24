@@ -47,6 +47,9 @@ function Home() {
                 <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
                   {t("newGroup")}
                 </Link>
+                <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+                  Contacts
+                </Link>
                 <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
                   {t("settings")}
                 </Link>
@@ -196,7 +199,7 @@ function Home() {
 
       {/* FAB */}
       <button
-        onClick={() => navigate({ to: tab === "calls" ? "/new-group" : "/new-group" })}
+        onClick={() => navigate({ to: tab === "chats" ? "/contacts" : "/new-group" })}
         className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center text-white"
         style={{ background: "var(--color-primary)" }}
         aria-label="new"
