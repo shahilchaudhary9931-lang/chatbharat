@@ -92,7 +92,19 @@ function Profile() {
             onBlur={() => localStorage.setItem("cw_about", about)}
             className="w-full bg-transparent outline-none text-base"
           />
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {[t("available"), t("busy"), t("atWork"), t("sleeping"), t("inMeeting"), t("batteryLow")].map((preset) => (
+              <button
+                key={preset}
+                onClick={() => { setAbout(preset); localStorage.setItem("cw_about", preset); }}
+                className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${about === preset ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
         </Row>
+
 
         <Row icon="📱" label="Phone">
           <div className="text-base">+91 {phone || "—"}</div>
