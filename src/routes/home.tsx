@@ -184,9 +184,10 @@ function Home() {
       )}
 
       {tab === "calls" && (
-        <ul className="flex-1">
+        <ul key="calls" className="flex-1 anim-stagger">
           {calls.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
+            <li key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift">
+
               <Avatar name={c.name} hue={c.avatarHue} size={48} />
               <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                 <div className={`font-semibold truncate ${c.direction === "missed" ? "text-destructive" : ""}`}>{c.name}</div>
