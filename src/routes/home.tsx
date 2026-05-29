@@ -157,9 +157,10 @@ function Home() {
           <div className="px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground font-semibold">
             {t("recentUpdates")}
           </div>
-          <ul>
+          <ul className="anim-stagger">
             {stories.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
+              <li key={s.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press">
+
                 <div
                   className="rounded-full p-[2.5px]"
                   style={{
