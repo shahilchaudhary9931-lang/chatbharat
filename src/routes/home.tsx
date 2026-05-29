@@ -207,7 +207,8 @@ function Home() {
       {/* FAB */}
       <button
         onClick={() => navigate({ to: tab === "chats" ? "/contacts" : "/new-group" })}
-        className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center text-white"
+        className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl flex items-center justify-center text-white fab"
+
         style={{ background: "var(--color-primary)" }}
         aria-label="new"
       >
