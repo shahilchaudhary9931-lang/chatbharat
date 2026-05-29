@@ -44,18 +44,19 @@ function Home() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-11 bg-popover text-popover-foreground shadow-lg rounded-lg py-2 min-w-44 z-30 border border-border">
-                <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+              <div className="absolute right-0 top-11 bg-popover text-popover-foreground shadow-lg rounded-lg py-2 min-w-44 z-30 border border-border anim-pop origin-top-right">
+                <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("newGroup")}
                 </Link>
-                <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+                <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Contacts
                 </Link>
-                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("settings")}
                 </Link>
               </div>
             )}
+
           </div>
         </div>
 
