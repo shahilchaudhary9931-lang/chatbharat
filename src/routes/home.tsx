@@ -78,14 +78,15 @@ function Home() {
             <button
               key={tabKey}
               onClick={() => setTab(tabKey)}
-              className="flex-1 py-2.5 text-sm font-semibold uppercase tracking-wide relative"
-              style={{ opacity: tab === tabKey ? 1 : 0.7 }}
+              className="flex-1 py-2.5 text-sm font-semibold uppercase tracking-wide relative press"
+              style={{ opacity: tab === tabKey ? 1 : 0.7, transition: "opacity 200ms ease" }}
             >
               {t(tabKey)}
-              {tab === tabKey && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full" />}
+              {tab === tabKey && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full anim-fade" />}
             </button>
           ))}
         </nav>
+
       </header>
 
       {/* Body */}
