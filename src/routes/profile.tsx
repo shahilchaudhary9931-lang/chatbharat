@@ -204,9 +204,17 @@ function Profile() {
           <Switch checked onChange={() => {}} />
         </Row>
 
-        <Row icon="🔒" label={t("privacy")}>
-          <span className="text-muted-foreground text-sm">›</span>
-        </Row>
+        <button onClick={() => navigate({ to: "/settings/privacy" })} className="w-full text-left">
+          <Row icon="🔒" label={t("privacy")}>
+            <span className="text-muted-foreground text-sm">Last seen, blocked, app lock ›</span>
+          </Row>
+        </button>
+
+        <button onClick={() => navigate({ to: "/settings/security" })} className="w-full text-left">
+          <Row icon="🛡️" label="Security">
+            <span className="text-muted-foreground text-sm">Two-step, encryption, sessions ›</span>
+          </Row>
+        </button>
 
         <Row icon="❓" label={t("help")}>
           <span className="text-muted-foreground text-sm">›</span>
