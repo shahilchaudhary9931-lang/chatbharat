@@ -51,8 +51,11 @@ function Home() {
                 <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Contacts
                 </Link>
-                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                <Link to="/settings" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("settings")}
+                </Link>
+                <Link to="/settings/privacy" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  {t("privacy")}
                 </Link>
               </div>
             )}

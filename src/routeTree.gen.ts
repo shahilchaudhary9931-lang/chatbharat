@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OtpRouteImport } from './routes/otp'
 import { Route as NewGroupRouteImport } from './routes/new-group'
@@ -16,8 +17,20 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsSessionsRouteImport } from './routes/settings.sessions'
+import { Route as SettingsSecurityRouteImport } from './routes/settings.security'
+import { Route as SettingsSafetyRouteImport } from './routes/settings.safety'
+import { Route as SettingsPrivacyRouteImport } from './routes/settings.privacy'
+import { Route as SettingsDevicesRouteImport } from './routes/settings.devices'
+import { Route as SettingsBlockedRouteImport } from './routes/settings.blocked'
+import { Route as SettingsAppLockRouteImport } from './routes/settings.app-lock'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -53,6 +66,41 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsSessionsRoute = SettingsSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsSafetyRoute = SettingsSafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsPrivacyRoute = SettingsPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsDevicesRoute = SettingsDevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsBlockedRoute = SettingsBlockedRouteImport.update({
+  id: '/blocked',
+  path: '/blocked',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsAppLockRoute = SettingsAppLockRouteImport.update({
+  id: '/app-lock',
+  path: '/app-lock',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const ChatIdRoute = ChatIdRouteImport.update({
   id: '/chat/$id',
   path: '/chat/$id',
@@ -67,7 +115,15 @@ export interface FileRoutesByFullPath {
   '/new-group': typeof NewGroupRoute
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/chat/$id': typeof ChatIdRoute
+  '/settings/app-lock': typeof SettingsAppLockRoute
+  '/settings/blocked': typeof SettingsBlockedRoute
+  '/settings/devices': typeof SettingsDevicesRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/safety': typeof SettingsSafetyRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/settings/sessions': typeof SettingsSessionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +133,15 @@ export interface FileRoutesByTo {
   '/new-group': typeof NewGroupRoute
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/chat/$id': typeof ChatIdRoute
+  '/settings/app-lock': typeof SettingsAppLockRoute
+  '/settings/blocked': typeof SettingsBlockedRoute
+  '/settings/devices': typeof SettingsDevicesRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/safety': typeof SettingsSafetyRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/settings/sessions': typeof SettingsSessionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +152,15 @@ export interface FileRoutesById {
   '/new-group': typeof NewGroupRoute
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/chat/$id': typeof ChatIdRoute
+  '/settings/app-lock': typeof SettingsAppLockRoute
+  '/settings/blocked': typeof SettingsBlockedRoute
+  '/settings/devices': typeof SettingsDevicesRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/safety': typeof SettingsSafetyRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/settings/sessions': typeof SettingsSessionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +172,15 @@ export interface FileRouteTypes {
     | '/new-group'
     | '/otp'
     | '/profile'
+    | '/settings'
     | '/chat/$id'
+    | '/settings/app-lock'
+    | '/settings/blocked'
+    | '/settings/devices'
+    | '/settings/privacy'
+    | '/settings/safety'
+    | '/settings/security'
+    | '/settings/sessions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,7 +190,15 @@ export interface FileRouteTypes {
     | '/new-group'
     | '/otp'
     | '/profile'
+    | '/settings'
     | '/chat/$id'
+    | '/settings/app-lock'
+    | '/settings/blocked'
+    | '/settings/devices'
+    | '/settings/privacy'
+    | '/settings/safety'
+    | '/settings/security'
+    | '/settings/sessions'
   id:
     | '__root__'
     | '/'
@@ -120,7 +208,15 @@ export interface FileRouteTypes {
     | '/new-group'
     | '/otp'
     | '/profile'
+    | '/settings'
     | '/chat/$id'
+    | '/settings/app-lock'
+    | '/settings/blocked'
+    | '/settings/devices'
+    | '/settings/privacy'
+    | '/settings/safety'
+    | '/settings/security'
+    | '/settings/sessions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,11 +227,19 @@ export interface RootRouteChildren {
   NewGroupRoute: typeof NewGroupRoute
   OtpRoute: typeof OtpRoute
   ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   ChatIdRoute: typeof ChatIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -185,6 +289,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/sessions': {
+      id: '/settings/sessions'
+      path: '/sessions'
+      fullPath: '/settings/sessions'
+      preLoaderRoute: typeof SettingsSessionsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/security': {
+      id: '/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/safety': {
+      id: '/settings/safety'
+      path: '/safety'
+      fullPath: '/settings/safety'
+      preLoaderRoute: typeof SettingsSafetyRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/privacy': {
+      id: '/settings/privacy'
+      path: '/privacy'
+      fullPath: '/settings/privacy'
+      preLoaderRoute: typeof SettingsPrivacyRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/devices': {
+      id: '/settings/devices'
+      path: '/devices'
+      fullPath: '/settings/devices'
+      preLoaderRoute: typeof SettingsDevicesRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/blocked': {
+      id: '/settings/blocked'
+      path: '/blocked'
+      fullPath: '/settings/blocked'
+      preLoaderRoute: typeof SettingsBlockedRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/app-lock': {
+      id: '/settings/app-lock'
+      path: '/app-lock'
+      fullPath: '/settings/app-lock'
+      preLoaderRoute: typeof SettingsAppLockRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/chat/$id': {
       id: '/chat/$id'
       path: '/chat/$id'
@@ -195,6 +348,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SettingsRouteChildren {
+  SettingsAppLockRoute: typeof SettingsAppLockRoute
+  SettingsBlockedRoute: typeof SettingsBlockedRoute
+  SettingsDevicesRoute: typeof SettingsDevicesRoute
+  SettingsPrivacyRoute: typeof SettingsPrivacyRoute
+  SettingsSafetyRoute: typeof SettingsSafetyRoute
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
+  SettingsSessionsRoute: typeof SettingsSessionsRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsAppLockRoute: SettingsAppLockRoute,
+  SettingsBlockedRoute: SettingsBlockedRoute,
+  SettingsDevicesRoute: SettingsDevicesRoute,
+  SettingsPrivacyRoute: SettingsPrivacyRoute,
+  SettingsSafetyRoute: SettingsSafetyRoute,
+  SettingsSecurityRoute: SettingsSecurityRoute,
+  SettingsSessionsRoute: SettingsSessionsRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContactsRoute: ContactsRoute,
@@ -203,6 +380,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewGroupRoute: NewGroupRoute,
   OtpRoute: OtpRoute,
   ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   ChatIdRoute: ChatIdRoute,
 }
 export const routeTree = rootRouteImport
