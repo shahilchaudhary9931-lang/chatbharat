@@ -5,7 +5,10 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
+
+
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
@@ -81,15 +84,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <I18nProvider>
           <div className="app-shell">
-            <Outlet />
+            <div key={pathname} className="anim-page">
+              <Outlet />
+            </div>
           </div>
         </I18nProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
 }
+

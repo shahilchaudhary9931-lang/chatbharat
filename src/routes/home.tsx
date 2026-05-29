@@ -36,25 +36,27 @@ function Home() {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold">{t("appName")}</h1>
           <div className="flex items-center gap-1 relative">
-            <button className="p-2 rounded-full hover:bg-white/10" aria-label="search">
+            <button className="p-2 rounded-full hover:bg-white/10 press" aria-label="search">
               <SearchIcon />
             </button>
-            <button className="p-2 rounded-full hover:bg-white/10" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">
+            <button className="p-2 rounded-full hover:bg-white/10 press" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">
               <DotsIcon />
             </button>
+
             {menuOpen && (
-              <div className="absolute right-0 top-11 bg-popover text-popover-foreground shadow-lg rounded-lg py-2 min-w-44 z-30 border border-border">
-                <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+              <div className="absolute right-0 top-11 bg-popover text-popover-foreground shadow-lg rounded-lg py-2 min-w-44 z-30 border border-border anim-pop origin-top-right">
+                <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("newGroup")}
                 </Link>
-                <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+                <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Contacts
                 </Link>
-                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
+                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("settings")}
                 </Link>
               </div>
             )}
+
           </div>
         </div>
 
@@ -76,19 +78,20 @@ function Home() {
             <button
               key={tabKey}
               onClick={() => setTab(tabKey)}
-              className="flex-1 py-2.5 text-sm font-semibold uppercase tracking-wide relative"
-              style={{ opacity: tab === tabKey ? 1 : 0.7 }}
+              className="flex-1 py-2.5 text-sm font-semibold uppercase tracking-wide relative press"
+              style={{ opacity: tab === tabKey ? 1 : 0.7, transition: "opacity 200ms ease" }}
             >
               {t(tabKey)}
-              {tab === tabKey && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full" />}
+              {tab === tabKey && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full anim-fade" />}
             </button>
           ))}
         </nav>
+
       </header>
 
       {/* Body */}
       {tab === "chats" && (
-        <ul className="flex-1">
+        <ul key="chats" className="flex-1 anim-stagger">
           {filtered.length === 0 && (
             <li className="text-center text-sm text-muted-foreground py-12">No chats found.</li>
           )}
@@ -97,8 +100,9 @@ function Home() {
               <Link
                 to="/chat/$id"
                 params={{ id: c.id }}
-                className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40"
+                className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40 hover-lift press"
               >
+
                 <Avatar name={c.name} hue={c.avatarHue} size={52} />
                 <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                   <div className="flex items-center justify-between">
@@ -132,7 +136,8 @@ function Home() {
       )}
 
       {tab === "status" && (
-        <div className="flex-1">
+        <div key="status" className="flex-1 anim-slide-up">
+
           {/* My status */}
           <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
             <div className="relative">
@@ -152,9 +157,10 @@ function Home() {
           <div className="px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground font-semibold">
             {t("recentUpdates")}
           </div>
-          <ul>
+          <ul className="anim-stagger">
             {stories.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
+              <li key={s.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press">
+
                 <div
                   className="rounded-full p-[2.5px]"
                   style={{
@@ -178,9 +184,10 @@ function Home() {
       )}
 
       {tab === "calls" && (
-        <ul className="flex-1">
+        <ul key="calls" className="flex-1 anim-stagger">
           {calls.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
+            <li key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift">
+
               <Avatar name={c.name} hue={c.avatarHue} size={48} />
               <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                 <div className={`font-semibold truncate ${c.direction === "missed" ? "text-destructive" : ""}`}>{c.name}</div>
@@ -189,7 +196,7 @@ function Home() {
                   <span>{c.time}</span>
                 </div>
               </div>
-              <button className="p-2 rounded-full text-primary" aria-label={c.type}>
+              <button className="p-2 rounded-full text-primary press" aria-label={c.type}>
                 {c.type === "video" ? <VideoIcon /> : <PhoneIcon />}
               </button>
             </li>
@@ -200,7 +207,8 @@ function Home() {
       {/* FAB */}
       <button
         onClick={() => navigate({ to: tab === "chats" ? "/contacts" : "/new-group" })}
-        className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center text-white"
+        className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl flex items-center justify-center text-white fab"
+
         style={{ background: "var(--color-primary)" }}
         aria-label="new"
       >
