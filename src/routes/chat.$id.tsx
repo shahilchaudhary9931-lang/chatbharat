@@ -338,7 +338,7 @@ function Bubble({ msg, grouped, selected, onSelect, hasSelection }: { msg: XMess
         onTouchStart={startPress} onTouchEnd={cancelPress} onTouchMove={cancelPress}
         onClick={handleClick}
         onContextMenu={(e) => { e.preventDefault(); onSelect(); }}
-        className={`relative max-w-[78%] rounded-xl px-2.5 pt-1.5 pb-1 shadow-sm cursor-pointer ${grouped ? "" : isOut ? "bubble-tail-out" : "bubble-tail-in"} ${msg.isNew ? "anim-bubble" : ""}`}
+        className={`relative max-w-[78%] rounded-xl px-2.5 pt-1.5 pb-1 shadow-sm cursor-pointer ${grouped ? "" : isOut ? "bubble-tail-out" : "bubble-tail-in"} ${msg.isNew ? (isOut ? "anim-bubble-out" : "anim-bubble-in") : ""}`}
         style={{
           background: isOut ? "var(--color-bubble-out)" : "var(--color-bubble-in)",
           color: isOut ? "var(--color-bubble-out-foreground)" : "var(--color-bubble-in-foreground)",
