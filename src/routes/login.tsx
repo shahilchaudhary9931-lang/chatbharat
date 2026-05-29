@@ -59,10 +59,11 @@ function Login() {
         <div className="mt-auto flex flex-col gap-3">
           <button
             type="submit"
-            className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base active:scale-[0.98] transition"
+            className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base press"
           >
             {t("next")}
           </button>
+
           <Link to="/home" className="text-center text-xs text-muted-foreground">
             Skip for demo →
           </Link>
