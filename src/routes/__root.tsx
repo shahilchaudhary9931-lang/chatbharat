@@ -5,7 +5,10 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
+
+
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
