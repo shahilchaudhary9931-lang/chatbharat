@@ -136,7 +136,8 @@ function Home() {
       )}
 
       {tab === "status" && (
-        <div className="flex-1">
+        <div key="status" className="flex-1 anim-slide-up">
+
           {/* My status */}
           <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
             <div className="relative">
