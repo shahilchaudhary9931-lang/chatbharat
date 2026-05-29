@@ -155,4 +155,234 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
- 
+  '/settings/blocked': typeof SettingsBlockedRoute
+  '/settings/devices': typeof SettingsDevicesRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/safety': typeof SettingsSafetyRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/settings/sessions': typeof SettingsSessionsRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/contacts'
+    | '/home'
+    | '/login'
+    | '/new-group'
+    | '/otp'
+    | '/profile'
+    | '/settings'
+    | '/chat/$id'
+    | '/settings/app-lock'
+    | '/settings/blocked'
+    | '/settings/devices'
+    | '/settings/privacy'
+    | '/settings/safety'
+    | '/settings/security'
+    | '/settings/sessions'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/contacts'
+    | '/home'
+    | '/login'
+    | '/new-group'
+    | '/otp'
+    | '/profile'
+    | '/settings'
+    | '/chat/$id'
+    | '/settings/app-lock'
+    | '/settings/blocked'
+    | '/settings/devices'
+    | '/settings/privacy'
+    | '/settings/safety'
+    | '/settings/security'
+    | '/settings/sessions'
+  id:
+    | '__root__'
+    | '/'
+    | '/contacts'
+    | '/home'
+    | '/login'
+    | '/new-group'
+    | '/otp'
+    | '/profile'
+    | '/settings'
+    | '/chat/$id'
+    | '/settings/app-lock'
+    | '/settings/blocked'
+    | '/settings/devices'
+    | '/settings/privacy'
+    | '/settings/safety'
+    | '/settings/security'
+    | '/settings/sessions'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  ContactsRoute: typeof ContactsRoute
+  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute
+  NewGroupRoute: typeof NewGroupRoute
+  OtpRoute: typeof OtpRoute
+  ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
+  ChatIdRoute: typeof ChatIdRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/otp': {
+      id: '/otp'
+      path: '/otp'
+      fullPath: '/otp'
+      preLoaderRoute: typeof OtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new-group': {
+      id: '/new-group'
+      path: '/new-group'
+      fullPath: '/new-group'
+      preLoaderRoute: typeof NewGroupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacts': {
+      id: '/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof ContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/sessions': {
+      id: '/settings/sessions'
+      path: '/sessions'
+      fullPath: '/settings/sessions'
+      preLoaderRoute: typeof SettingsSessionsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/security': {
+      id: '/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/safety': {
+      id: '/settings/safety'
+      path: '/safety'
+      fullPath: '/settings/safety'
+      preLoaderRoute: typeof SettingsSafetyRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/privacy': {
+      id: '/settings/privacy'
+      path: '/privacy'
+      fullPath: '/settings/privacy'
+      preLoaderRoute: typeof SettingsPrivacyRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/devices': {
+      id: '/settings/devices'
+      path: '/devices'
+      fullPath: '/settings/devices'
+      preLoaderRoute: typeof SettingsDevicesRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/blocked': {
+      id: '/settings/blocked'
+      path: '/blocked'
+      fullPath: '/settings/blocked'
+      preLoaderRoute: typeof SettingsBlockedRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/app-lock': {
+      id: '/settings/app-lock'
+      path: '/app-lock'
+      fullPath: '/settings/app-lock'
+      preLoaderRoute: typeof SettingsAppLockRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/chat/$id': {
+      id: '/chat/$id'
+      path: '/chat/$id'
+      fullPath: '/chat/$id'
+      preLoaderRoute: typeof ChatIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+interface SettingsRouteChildren {
+  SettingsAppLockRoute: typeof SettingsAppLockRoute
+  SettingsBlockedRoute: typeof SettingsBlockedRoute
+  SettingsDevicesRoute: typeof SettingsDevicesRoute
+  SettingsPrivacyRoute: typeof SettingsPrivacyRoute
+  SettingsSafetyRoute: typeof SettingsSafetyRoute
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
+  SettingsSessionsRoute: typeof SettingsSessionsRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsAppLockRoute: SettingsAppLockRoute,
+  SettingsBlockedRoute: SettingsBlockedRoute,
+  SettingsDevicesRoute: SettingsDevicesRoute,
+  SettingsPrivacyRoute: SettingsPrivacyRoute,
+  SettingsSafetyRoute: SettingsSafetyRoute,
+  SettingsSecurityRoute: SettingsSecurityRoute,
+  SettingsSessionsRoute: SettingsSessionsRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  ContactsRoute: ContactsRoute,
+  HomeRoute: HomeRoute,
+  LoginRoute: LoginRoute,
+  NewGroupRoute: NewGroupRoute,
+  OtpRoute: OtpRoute,
+  ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRouteWithChildren,
+  ChatIdRoute: ChatIdRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
