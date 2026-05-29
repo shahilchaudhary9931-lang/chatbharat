@@ -36,12 +36,13 @@ function Home() {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold">{t("appName")}</h1>
           <div className="flex items-center gap-1 relative">
-            <button className="p-2 rounded-full hover:bg-white/10" aria-label="search">
+            <button className="p-2 rounded-full hover:bg-white/10 press" aria-label="search">
               <SearchIcon />
             </button>
-            <button className="p-2 rounded-full hover:bg-white/10" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">
+            <button className="p-2 rounded-full hover:bg-white/10 press" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">
               <DotsIcon />
             </button>
+
             {menuOpen && (
               <div className="absolute right-0 top-11 bg-popover text-popover-foreground shadow-lg rounded-lg py-2 min-w-44 z-30 border border-border">
                 <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted" onClick={() => setMenuOpen(false)}>
