@@ -91,7 +91,7 @@ function Home() {
 
       {/* Body */}
       {tab === "chats" && (
-        <ul className="flex-1">
+        <ul key="chats" className="flex-1 anim-stagger">
           {filtered.length === 0 && (
             <li className="text-center text-sm text-muted-foreground py-12">No chats found.</li>
           )}
@@ -100,8 +100,9 @@ function Home() {
               <Link
                 to="/chat/$id"
                 params={{ id: c.id }}
-                className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40"
+                className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40 hover-lift press"
               >
+
                 <Avatar name={c.name} hue={c.avatarHue} size={52} />
                 <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                   <div className="flex items-center justify-between">
