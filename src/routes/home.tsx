@@ -76,17 +76,18 @@ function Home() {
           </div>
         </div>
 
-        {/* Search bar */}
-        <div className="bg-white/15 rounded-full flex items-center px-3 py-1.5 mb-2">
-          <SearchIcon size={16} />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="bg-transparent outline-none px-2 py-1 text-sm flex-1 placeholder:text-white/70"
-            style={{ color: "var(--color-header-foreground)" }}
-          />
-        </div>
+        {searchOpen && (
+          <div className="bg-white/15 rounded-full flex items-center px-3 py-1.5 mb-2 anim-fade">
+            <SearchIcon size={16} />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={t("searchPlaceholder")}
+              className="bg-transparent outline-none px-2 py-1 text-sm flex-1 placeholder:text-white/70"
+              style={{ color: "var(--color-header-foreground)" }}
+            />
+          </div>
+        )}
 
         {/* Tabs */}
         <nav className="flex">
