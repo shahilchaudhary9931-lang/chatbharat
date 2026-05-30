@@ -15,6 +15,7 @@ function Home() {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("chats");
   const [q, setQ] = useState("");
+  const [searchOpen, setSearchOpen] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -36,7 +37,7 @@ function Home() {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold">{t("appName")}</h1>
           <div className="flex items-center gap-1 relative">
-            <button className="p-2 rounded-full hover:bg-white/10 press" aria-label="search">
+            <button className="p-2 rounded-full hover:bg-white/10 press" onClick={() => setSearchOpen((v) => !v)} aria-label="search">
               <SearchIcon />
             </button>
             <button className="p-2 rounded-full hover:bg-white/10 press" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">
@@ -51,11 +52,23 @@ function Home() {
                 <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Contacts
                 </Link>
+                <Link to="/status" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Add status
+                </Link>
+                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Profile
+                </Link>
                 <Link to="/settings" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("settings")}
                 </Link>
                 <Link to="/settings/privacy" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("privacy")}
+                </Link>
+                <Link to="/settings/security" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Security
+                </Link>
+                <Link to="/settings/safety" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Safety center
                 </Link>
               </div>
             )}
@@ -63,17 +76,18 @@ function Home() {
           </div>
         </div>
 
-        {/* Search bar */}
-        <div className="bg-white/15 rounded-full flex items-center px-3 py-1.5 mb-2">
-          <SearchIcon size={16} />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="bg-transparent outline-none px-2 py-1 text-sm flex-1 placeholder:text-white/70"
-            style={{ color: "var(--color-header-foreground)" }}
-          />
-        </div>
+        {searchOpen && (
+          <div className="bg-white/15 rounded-full flex items-center px-3 py-1.5 mb-2 anim-fade">
+            <SearchIcon size={16} />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={t("searchPlaceholder")}
+              className="bg-transparent outline-none px-2 py-1 text-sm flex-1 placeholder:text-white/70"
+              style={{ color: "var(--color-header-foreground)" }}
+            />
+          </div>
+        )}
 
         {/* Tabs */}
         <nav className="flex">
@@ -142,7 +156,10 @@ function Home() {
         <div key="status" className="flex-1 anim-slide-up">
 
           {/* My status */}
-          <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
+          <button
+            onClick={() => navigate({ to: "/status" })}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press text-left"
+          >
             <div className="relative">
               <Avatar name="You" hue={170} size={52} />
               <span
@@ -155,31 +172,35 @@ function Home() {
               <div className="font-semibold">{t("myStatus")}</div>
               <div className="text-xs text-muted-foreground">{t("tapToAdd")}</div>
             </div>
-          </div>
+          </button>
 
           <div className="px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground font-semibold">
             {t("recentUpdates")}
           </div>
           <ul className="anim-stagger">
             {stories.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press">
-
-                <div
-                  className="rounded-full p-[2.5px]"
-                  style={{
-                    background: s.viewed
-                      ? "var(--color-border)"
-                      : "conic-gradient(var(--color-primary), var(--color-accent), var(--color-primary))",
-                  }}
+              <li key={s.id}>
+                <button
+                  onClick={() => navigate({ to: "/status" })}
+                  className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press"
                 >
-                  <div className="rounded-full p-[2px] bg-background">
-                    <Avatar name={s.name} hue={s.avatarHue} size={48} />
+                  <div
+                    className="rounded-full p-[2.5px]"
+                    style={{
+                      background: s.viewed
+                        ? "var(--color-border)"
+                        : "conic-gradient(var(--color-primary), var(--color-accent), var(--color-primary))",
+                    }}
+                  >
+                    <div className="rounded-full p-[2px] bg-background">
+                      <Avatar name={s.name} hue={s.avatarHue} size={48} />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="font-semibold">{s.name}</div>
-                  <div className="text-xs text-muted-foreground">{s.time}{s.caption ? ` · ${s.caption}` : ""}</div>
-                </div>
+                  <div>
+                    <div className="font-semibold">{s.name}</div>
+                    <div className="text-xs text-muted-foreground">{s.time}{s.caption ? ` · ${s.caption}` : ""}</div>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>
@@ -199,7 +220,11 @@ function Home() {
                   <span>{c.time}</span>
                 </div>
               </div>
-              <button className="p-2 rounded-full text-primary press" aria-label={c.type}>
+              <button
+                onClick={() => alert(`${c.type === "video" ? "Video" : "Voice"} call · ${c.name}`)}
+                className="p-2 rounded-full text-primary press"
+                aria-label={c.type}
+              >
                 {c.type === "video" ? <VideoIcon /> : <PhoneIcon />}
               </button>
             </li>
@@ -209,7 +234,7 @@ function Home() {
 
       {/* FAB */}
       <button
-        onClick={() => navigate({ to: tab === "chats" ? "/contacts" : "/new-group" })}
+        onClick={() => navigate({ to: tab === "status" ? "/status" : tab === "calls" ? "/contacts" : "/contacts" })}
         className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl flex items-center justify-center text-white fab"
 
         style={{ background: "var(--color-primary)" }}
