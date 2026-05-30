@@ -18,7 +18,6 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StatusRouteImport } from './routes/status'
 import { Route as SettingsSessionsRouteImport } from './routes/settings.sessions'
 import { Route as SettingsSecurityRouteImport } from './routes/settings.security'
 import { Route as SettingsSafetyRouteImport } from './routes/settings.safety'
@@ -71,6 +70,11 @@ const ContactsRoute = ContactsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsSessionsRoute = SettingsSessionsRouteImport.update({
