@@ -156,7 +156,10 @@ function Home() {
         <div key="status" className="flex-1 anim-slide-up">
 
           {/* My status */}
-          <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
+          <button
+            onClick={() => navigate({ to: "/status" })}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press text-left"
+          >
             <div className="relative">
               <Avatar name="You" hue={170} size={52} />
               <span
@@ -169,31 +172,35 @@ function Home() {
               <div className="font-semibold">{t("myStatus")}</div>
               <div className="text-xs text-muted-foreground">{t("tapToAdd")}</div>
             </div>
-          </div>
+          </button>
 
           <div className="px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground font-semibold">
             {t("recentUpdates")}
           </div>
           <ul className="anim-stagger">
             {stories.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press">
-
-                <div
-                  className="rounded-full p-[2.5px]"
-                  style={{
-                    background: s.viewed
-                      ? "var(--color-border)"
-                      : "conic-gradient(var(--color-primary), var(--color-accent), var(--color-primary))",
-                  }}
+              <li key={s.id}>
+                <button
+                  onClick={() => navigate({ to: "/status" })}
+                  className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press"
                 >
-                  <div className="rounded-full p-[2px] bg-background">
-                    <Avatar name={s.name} hue={s.avatarHue} size={48} />
+                  <div
+                    className="rounded-full p-[2.5px]"
+                    style={{
+                      background: s.viewed
+                        ? "var(--color-border)"
+                        : "conic-gradient(var(--color-primary), var(--color-accent), var(--color-primary))",
+                    }}
+                  >
+                    <div className="rounded-full p-[2px] bg-background">
+                      <Avatar name={s.name} hue={s.avatarHue} size={48} />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="font-semibold">{s.name}</div>
-                  <div className="text-xs text-muted-foreground">{s.time}{s.caption ? ` · ${s.caption}` : ""}</div>
-                </div>
+                  <div>
+                    <div className="font-semibold">{s.name}</div>
+                    <div className="text-xs text-muted-foreground">{s.time}{s.caption ? ` · ${s.caption}` : ""}</div>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>
