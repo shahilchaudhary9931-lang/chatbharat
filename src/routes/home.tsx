@@ -52,11 +52,23 @@ function Home() {
                 <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Contacts
                 </Link>
+                <Link to="/status" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Add status
+                </Link>
+                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Profile
+                </Link>
                 <Link to="/settings" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("settings")}
                 </Link>
                 <Link to="/settings/privacy" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("privacy")}
+                </Link>
+                <Link to="/settings/security" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Security
+                </Link>
+                <Link to="/settings/safety" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
+                  Safety center
                 </Link>
               </div>
             )}
