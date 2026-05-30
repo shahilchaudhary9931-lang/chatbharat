@@ -37,7 +37,7 @@ function Home() {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold">{t("appName")}</h1>
           <div className="flex items-center gap-1 relative">
-            <button className="p-2 rounded-full hover:bg-white/10 press" aria-label="search">
+            <button className="p-2 rounded-full hover:bg-white/10 press" onClick={() => setSearchOpen((v) => !v)} aria-label="search">
               <SearchIcon />
             </button>
             <button className="p-2 rounded-full hover:bg-white/10 press" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">
