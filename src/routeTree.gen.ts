@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OtpRouteImport } from './routes/otp'
@@ -17,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as SettingsSessionsRouteImport } from './routes/settings.sessions'
 import { Route as SettingsSecurityRouteImport } from './routes/settings.security'
 import { Route as SettingsSafetyRouteImport } from './routes/settings.safety'
@@ -26,6 +28,11 @@ import { Route as SettingsBlockedRouteImport } from './routes/settings.blocked'
 import { Route as SettingsAppLockRouteImport } from './routes/settings.app-lock'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/status': typeof StatusRoute
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
   '/settings/blocked': typeof SettingsBlockedRoute
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/status': typeof StatusRoute
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
   '/settings/blocked': typeof SettingsBlockedRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/status': typeof StatusRoute
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
   '/settings/blocked': typeof SettingsBlockedRoute
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/otp'
     | '/profile'
     | '/settings'
+    | '/status'
     | '/chat/$id'
     | '/settings/app-lock'
     | '/settings/blocked'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/otp'
     | '/profile'
     | '/settings'
+    | '/status'
     | '/chat/$id'
     | '/settings/app-lock'
     | '/settings/blocked'
@@ -209,6 +221,7 @@ export interface FileRouteTypes {
     | '/otp'
     | '/profile'
     | '/settings'
+    | '/status'
     | '/chat/$id'
     | '/settings/app-lock'
     | '/settings/blocked'
@@ -228,11 +241,19 @@ export interface RootRouteChildren {
   OtpRoute: typeof OtpRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRouteWithChildren
+  StatusRoute: typeof StatusRoute
   ChatIdRoute: typeof ChatIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -381,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   OtpRoute: OtpRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRouteWithChildren,
+  StatusRoute: StatusRoute,
   ChatIdRoute: ChatIdRoute,
 }
 export const routeTree = rootRouteImport
