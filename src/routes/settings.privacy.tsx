@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SettingsHeader, SettingsRow, Section, Toggle, Pill } from "@/components/SettingsShell";
 import { usePrivacy, type Audience } from "@/lib/privacy-store";
 
@@ -12,20 +13,65 @@ const audiences: { v: Audience; label: string }[] = [
 
 function PrivacyPage() {
   const [p, update] = usePrivacy();
+  const [saved, setSaved] = useState(false);
+  const patch = (x: Parameters<typeof update>[0]) => {
+    update(x);
+    setSaved(true);
+  };
+  useEffect(() => {
+    if (!saved) return;
+    const t = setTimeout(() => setSaved(false), 1400);
+    return () => clearTimeout(t);
+  }, [saved]);
+
   return (
     <div className="min-h-screen bg-background pb-12">
       <SettingsHeader title="Privacy" back="/settings" />
 
+      {saved && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full text-xs font-semibold text-white shadow-lg anim-pop"
+          style={{ background: "var(--color-primary)" }}>
+          ✓ Saved
+        </div>
+      )}
+
+      <Section title="Quick controls">
+        <SettingsRow
+          icon="👁️"
+          title="Hide last seen"
+          subtitle="No one will see when you were last online"
+          right={<Toggle checked={p.lastSeen === "nobody"} onChange={(v) => patch({ lastSeen: v ? "nobody" : "everyone" })} />}
+        />
+        <SettingsRow
+          icon="🟢"
+          title="Hide online status"
+          subtitle="Appear offline to others"
+          right={<Toggle checked={p.online !== "everyone"} onChange={(v) => patch({ online: v ? "same-as-last-seen" : "everyone" })} />}
+        />
+        <SettingsRow
+          icon="🖼️"
+          title="Hide profile photo"
+          subtitle="Only you will see your photo"
+          right={<Toggle checked={p.profilePhoto === "nobody"} onChange={(v) => patch({ profilePhoto: v ? "nobody" : "everyone" })} />}
+        />
+        <SettingsRow
+          icon="✓✓"
+          title="Read receipts"
+          subtitle="Send and receive blue ticks"
+          right={<Toggle checked={p.readReceipts} onChange={(v) => patch({ readReceipts: v })} />}
+        />
+      </Section>
+
       <Section title="Who can see my personal info">
-        <RowChoice label="Last seen & online" value={p.lastSeen} onChange={(v) => update({ lastSeen: v })} />
-        <RowChoice label="Profile photo" value={p.profilePhoto} onChange={(v) => update({ profilePhoto: v })} />
-        <RowChoice label="About" value={p.about} onChange={(v) => update({ about: v })} />
-        <RowChoice label="Status" value={p.status} onChange={(v) => update({ status: v })} />
+        <RowChoice label="Last seen & online" value={p.lastSeen} onChange={(v) => patch({ lastSeen: v })} />
+        <RowChoice label="Profile photo" value={p.profilePhoto} onChange={(v) => patch({ profilePhoto: v })} />
+        <RowChoice label="About" value={p.about} onChange={(v) => patch({ about: v })} />
+        <RowChoice label="Status" value={p.status} onChange={(v) => patch({ status: v })} />
         <SettingsRow
           icon="📞"
           title="Hide phone number"
           subtitle="Your number won't be visible in your profile"
-          right={<Toggle checked={p.hidePhone} onChange={(v) => update({ hidePhone: v })} />}
+          right={<Toggle checked={p.hidePhone} onChange={(v) => patch({ hidePhone: v })} />}
         />
       </Section>
 
