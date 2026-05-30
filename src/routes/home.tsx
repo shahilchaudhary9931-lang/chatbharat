@@ -15,6 +15,7 @@ function Home() {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("chats");
   const [q, setQ] = useState("");
+  const [searchOpen, setSearchOpen] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
