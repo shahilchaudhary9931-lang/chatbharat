@@ -220,7 +220,11 @@ function Home() {
                   <span>{c.time}</span>
                 </div>
               </div>
-              <button className="p-2 rounded-full text-primary press" aria-label={c.type}>
+              <button
+                onClick={() => alert(`${c.type === "video" ? "Video" : "Voice"} call · ${c.name}`)}
+                className="p-2 rounded-full text-primary press"
+                aria-label={c.type}
+              >
                 {c.type === "video" ? <VideoIcon /> : <PhoneIcon />}
               </button>
             </li>
