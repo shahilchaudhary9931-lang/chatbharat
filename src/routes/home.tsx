@@ -234,7 +234,7 @@ function Home() {
 
       {/* FAB */}
       <button
-        onClick={() => navigate({ to: tab === "chats" ? "/contacts" : "/new-group" })}
+        onClick={() => navigate({ to: tab === "status" ? "/status" : tab === "calls" ? "/contacts" : "/contacts" })}
         className="fixed bottom-6 right-[calc(50%-13rem+1.5rem)] sm:right-[calc(50%-13rem+1.5rem)] w-14 h-14 rounded-2xl flex items-center justify-center text-white fab"
 
         style={{ background: "var(--color-primary)" }}
