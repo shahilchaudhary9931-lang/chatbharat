@@ -94,6 +94,7 @@ function RootComponent() {
             <div key={pathname} className="anim-page">
               <Outlet />
             </div>
+            <AppLockGate />
           </div>
         </I18nProvider>
       </ThemeProvider>
