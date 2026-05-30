@@ -13,6 +13,7 @@ import {
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
+import { AppLockGate } from "@/components/AppLockGate";
 
 function NotFoundComponent() {
   return (
