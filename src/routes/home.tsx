@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { chats, stories, calls } from "@/lib/mock-data";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
+
+type MyStory = { id: string; src: string; kind: "image" | "video"; caption: string; createdAt: number };
 
 export const Route = createFileRoute("/home")({
   component: Home,
