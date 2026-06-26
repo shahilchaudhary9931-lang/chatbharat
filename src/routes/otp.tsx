@@ -84,9 +84,19 @@ function Otp() {
         )}
       </p>
 
-      <p className="text-xs text-muted-foreground text-center mt-6 opacity-60">
-        Demo: enter any 6 digits.
-      </p>
+      <div className="mt-8 mx-auto max-w-xs w-full rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 text-center">
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+          Demo mode · SMS not sent
+        </div>
+        <div className="text-2xl font-bold tracking-[0.4em] text-primary">123456</div>
+        <button
+          type="button"
+          onClick={() => setCode(["1", "2", "3", "4", "5", "6"])}
+          className="mt-3 text-xs font-semibold text-primary underline"
+        >
+          Use demo code
+        </button>
+      </div>
     </div>
   );
 }
