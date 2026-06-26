@@ -49,12 +49,6 @@ function Home() {
                 <Link to="/new-group" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   {t("newGroup")}
                 </Link>
-                <Link to="/contacts" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
-                  Contacts
-                </Link>
-                <Link to="/status" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
-                  Add status
-                </Link>
                 <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Profile
                 </Link>
@@ -66,9 +60,6 @@ function Home() {
                 </Link>
                 <Link to="/settings/security" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
                   Security
-                </Link>
-                <Link to="/settings/safety" className="block px-4 py-2 text-sm hover:bg-muted press" onClick={() => setMenuOpen(false)}>
-                  Safety center
                 </Link>
               </div>
             )}
