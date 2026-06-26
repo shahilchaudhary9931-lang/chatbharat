@@ -19,7 +19,14 @@ function Home() {
   const [q, setQ] = useState("");
   const [searchOpen, setSearchOpen] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [myStories, setMyStories] = useState<MyStory[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    try { setMyStories(JSON.parse(localStorage.getItem("cw_my_stories") || "[]")); } catch { /* ignore */ }
+  }, [tab]);
+
+  const latestMine = myStories[0];
 
   const filtered = useMemo(() => {
     if (!q.trim()) return chats;
@@ -154,7 +161,22 @@ function Home() {
             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 hover-lift press text-left"
           >
             <div className="relative">
-              <Avatar name="You" hue={170} size={52} />
+              {latestMine ? (
+                <div
+                  className="rounded-full p-[2.5px]"
+                  style={{ background: "conic-gradient(var(--color-primary), var(--color-accent), var(--color-primary))" }}
+                >
+                  <div className="rounded-full p-[2px] bg-background">
+                    {latestMine.kind === "image" ? (
+                      <img src={latestMine.src} alt="" className="w-[48px] h-[48px] rounded-full object-cover" />
+                    ) : (
+                      <video src={latestMine.src} muted playsInline className="w-[48px] h-[48px] rounded-full object-cover" />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <Avatar name="You" hue={170} size={52} />
+              )}
               <span
                 className="absolute -bottom-0.5 -right-0.5 rounded-full bg-primary text-primary-foreground w-5 h-5 flex items-center justify-center text-sm font-bold border-2 border-background"
               >
@@ -163,7 +185,11 @@ function Home() {
             </div>
             <div>
               <div className="font-semibold">{t("myStatus")}</div>
-              <div className="text-xs text-muted-foreground">{t("tapToAdd")}</div>
+              <div className="text-xs text-muted-foreground">
+                {latestMine
+                  ? `${myStories.length} update${myStories.length > 1 ? "s" : ""}${latestMine.caption ? ` · ${latestMine.caption}` : ""}`
+                  : t("tapToAdd")}
+              </div>
             </div>
           </button>
 
