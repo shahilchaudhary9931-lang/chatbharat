@@ -14,6 +14,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OtpRouteImport } from './routes/otp'
 import { Route as NewGroupRouteImport } from './routes/new-group'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ContactsRouteImport } from './routes/contacts'
@@ -26,6 +27,10 @@ import { Route as SettingsDevicesRouteImport } from './routes/settings.devices'
 import { Route as SettingsBlockedRouteImport } from './routes/settings.blocked'
 import { Route as SettingsAppLockRouteImport } from './routes/settings.app-lock'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
 const StatusRoute = StatusRouteImport.update({
   id: '/status',
@@ -50,6 +55,11 @@ const OtpRoute = OtpRouteImport.update({
 const NewGroupRoute = NewGroupRouteImport.update({
   id: '/new-group',
   path: '/new-group',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -112,17 +122,43 @@ const ChatIdRoute = ChatIdRouteImport.update({
   path: '/chat/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/new-group': typeof NewGroupRoute
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRouteWithChildren
   '/status': typeof StatusRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
   '/settings/blocked': typeof SettingsBlockedRoute
@@ -131,17 +167,22 @@ export interface FileRoutesByFullPath {
   '/settings/safety': typeof SettingsSafetyRoute
   '/settings/security': typeof SettingsSecurityRoute
   '/settings/sessions': typeof SettingsSessionsRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/new-group': typeof NewGroupRoute
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRouteWithChildren
   '/status': typeof StatusRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
   '/settings/blocked': typeof SettingsBlockedRoute
@@ -150,6 +191,8 @@ export interface FileRoutesByTo {
   '/settings/safety': typeof SettingsSafetyRoute
   '/settings/security': typeof SettingsSecurityRoute
   '/settings/sessions': typeof SettingsSessionsRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,11 +200,14 @@ export interface FileRoutesById {
   '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/new-group': typeof NewGroupRoute
   '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRouteWithChildren
   '/status': typeof StatusRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/chat/$id': typeof ChatIdRoute
   '/settings/app-lock': typeof SettingsAppLockRoute
   '/settings/blocked': typeof SettingsBlockedRoute
@@ -170,6 +216,8 @@ export interface FileRoutesById {
   '/settings/safety': typeof SettingsSafetyRoute
   '/settings/security': typeof SettingsSecurityRoute
   '/settings/sessions': typeof SettingsSessionsRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -178,11 +226,14 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/home'
     | '/login'
+    | '/mcp'
     | '/new-group'
     | '/otp'
     | '/profile'
     | '/settings'
     | '/status'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/chat/$id'
     | '/settings/app-lock'
     | '/settings/blocked'
@@ -191,17 +242,22 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/settings/security'
     | '/settings/sessions'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/contacts'
     | '/home'
     | '/login'
+    | '/mcp'
     | '/new-group'
     | '/otp'
     | '/profile'
     | '/settings'
     | '/status'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/chat/$id'
     | '/settings/app-lock'
     | '/settings/blocked'
@@ -210,17 +266,22 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/settings/security'
     | '/settings/sessions'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
     | '/contacts'
     | '/home'
     | '/login'
+    | '/mcp'
     | '/new-group'
     | '/otp'
     | '/profile'
     | '/settings'
     | '/status'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/chat/$id'
     | '/settings/app-lock'
     | '/settings/blocked'
@@ -229,6 +290,8 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/settings/security'
     | '/settings/sessions'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,12 +299,17 @@ export interface RootRouteChildren {
   ContactsRoute: typeof ContactsRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  McpRoute: typeof McpRoute
   NewGroupRoute: typeof NewGroupRoute
   OtpRoute: typeof OtpRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   StatusRoute: typeof StatusRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ChatIdRoute: typeof ChatIdRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -279,6 +347,13 @@ declare module '@tanstack/react-router' {
       path: '/new-group'
       fullPath: '/new-group'
       preLoaderRoute: typeof NewGroupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -365,6 +440,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -397,12 +500,18 @@ const rootRouteChildren: RootRouteChildren = {
   ContactsRoute: ContactsRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  McpRoute: McpRoute,
   NewGroupRoute: NewGroupRoute,
   OtpRoute: OtpRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRouteWithChildren,
   StatusRoute: StatusRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ChatIdRoute: ChatIdRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
