@@ -55,21 +55,30 @@ export type Database = {
       }
       profiles: {
         Row: {
+          about: string | null
+          avatar_url: string | null
           created_at: string
+          email: string | null
           id: string
-          phone_number: string
+          phone_number: string | null
           username: string | null
         }
         Insert: {
+          about?: string | null
+          avatar_url?: string | null
           created_at?: string
+          email?: string | null
           id: string
-          phone_number: string
+          phone_number?: string | null
           username?: string | null
         }
         Update: {
+          about?: string | null
+          avatar_url?: string | null
           created_at?: string
+          email?: string | null
           id?: string
-          phone_number?: string
+          phone_number?: string | null
           username?: string | null
         }
         Relationships: []
@@ -79,7 +88,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      find_profile_by_email: {
+        Args: { _email: string }
+        Returns: {
+          email: string
+          id: string
+          username: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

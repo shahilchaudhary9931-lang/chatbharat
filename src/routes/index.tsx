@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   component: Splash,
@@ -9,14 +10,15 @@ export const Route = createFileRoute("/")({
 function Splash() {
   const navigate = useNavigate();
   const { t, lang, setLang } = useI18n();
+  const { session, loading } = useAuth();
 
   useEffect(() => {
-    const isLoggedIn = typeof window !== "undefined" && localStorage.getItem("cw_user");
+    if (loading) return;
     const timer = setTimeout(() => {
-      navigate({ to: isLoggedIn ? "/home" : "/login" });
-    }, 1600);
+      navigate({ to: session ? "/home" : "/login" });
+    }, 1200);
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, session, loading]);
 
   return (
     <div
