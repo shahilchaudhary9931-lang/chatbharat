@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { AppLockGate } from "@/components/AppLockGate";
+import { AuthProvider } from "@/lib/auth";
 
 function NotFoundComponent() {
   return (
@@ -98,12 +99,14 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <I18nProvider>
+          <AuthProvider>
           <div className="app-shell">
             <div key={pathname} className="anim-page">
               <Outlet />
             </div>
             <AppLockGate />
           </div>
+          </AuthProvider>
         </I18nProvider>
       </ThemeProvider>
     </QueryClientProvider>
