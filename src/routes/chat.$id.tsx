@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { getChat, contacts, chats as allChats, type Message } from "@/lib/mock-data";
 import { Avatar } from "@/components/Avatar";
+import { RealChat } from "@/components/RealChat";
+import { UUID_RE } from "@/lib/chat-db";
 import { Ticks } from "@/components/Ticks";
 
 export const Route = createFileRoute("/chat/$id")({
@@ -38,7 +40,7 @@ interface XMessage extends Message {
 const EMOJIS = ["😀","😂","🥲","😍","😘","🤩","🤔","😎","😴","😭","😡","👍","🙏","👏","🔥","💯","❤️","💔","🎉","🌹","☕","🍕","✈️","⚽","🎵","📷","🎥","🤝","💪","🙈"];
 
 function ChatScreen() {
-  const chat = Route.useLoaderData();
+  const chat = Route.useLoaderData()!;
   const { t } = useI18n();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<XMessage[]>(chat.messages);
