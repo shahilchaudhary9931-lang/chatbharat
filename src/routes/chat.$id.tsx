@@ -6,17 +6,25 @@ import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
 
 export const Route = createFileRoute("/chat/$id")({
-  component: ChatScreen,
+  component: ChatRoute,
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chat not found.</div>
   ),
   errorComponent: () => <div className="min-h-screen flex items-center justify-center">Something went wrong.</div>,
   loader: ({ params }) => {
+    if (UUID_RE.test(params.id)) return null;
     const chat = getChat(params.id);
     if (!chat) throw notFound();
     return chat;
   },
 });
+
+function ChatRoute() {
+  const { id } = Route.useParams();
+  if (UUID_RE.test(id)) return <RealChat peerId={id} />;
+  return <ChatScreen />;
+}
+
 
 interface XMessage extends Message {
   starred?: boolean;
