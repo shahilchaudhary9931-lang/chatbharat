@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { Avatar } from "@/components/Avatar";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profile")({
   component: Profile,
@@ -12,6 +14,7 @@ function Profile() {
   const { t, lang, setLang } = useI18n();
   const { dark, setDark } = useTheme();
   const navigate = useNavigate();
+  const { user, profile, refreshProfile, signOut } = useAuth();
   const [name, setName] = useState("You");
   const [phone, setPhone] = useState("");
   const [about, setAbout] = useState("");
@@ -21,19 +24,29 @@ function Profile() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setPhone(localStorage.getItem("cw_phone") || "");
-    const u = localStorage.getItem("cw_user");
-    if (u) {
-      try { const o = JSON.parse(u); if (o.name) setName(o.name); } catch {}
-    }
     setAbout(localStorage.getItem("cw_about") || t("aboutDefault"));
     setSavedPhoto(localStorage.getItem("cw_avatar"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.username) setName(profile.username);
+    if (profile.about) setAbout(profile.about);
+    if (profile.avatar_url) setSavedPhoto(profile.avatar_url);
+    setPhone(profile.phone_number || "");
+  }, [profile]);
+
+  const persist = async (patch: Record<string, string | null>) => {
+    if (!user) return;
+    await supabase.from("profiles").update(patch).eq("id", user.id);
+    await refreshProfile();
+  };
+
   const saveName = () => {
     setEditName(false);
     localStorage.setItem("cw_user", JSON.stringify({ name, phone }));
+    void persist({ username: name.trim() || null });
   };
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +61,7 @@ function Profile() {
     if (!pendingPhoto) return;
     localStorage.setItem("cw_avatar", pendingPhoto);
     setSavedPhoto(pendingPhoto);
+    void persist({ avatar_url: pendingPhoto });
     setPendingPhoto(null);
   };
 
@@ -57,10 +71,12 @@ function Profile() {
     localStorage.removeItem("cw_avatar");
     setSavedPhoto(null);
     setPendingPhoto(null);
+    void persist({ avatar_url: null });
   };
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.removeItem("cw_user");
+    await signOut();
     navigate({ to: "/login" });
   };
 
@@ -153,14 +169,14 @@ function Profile() {
           <input
             value={about}
             onChange={(e) => setAbout(e.target.value)}
-            onBlur={() => localStorage.setItem("cw_about", about)}
+            onBlur={() => { localStorage.setItem("cw_about", about); void persist({ about }); }}
             className="w-full bg-transparent outline-none text-base"
           />
           <div className="flex flex-wrap gap-1.5 mt-2">
             {[t("available"), t("busy"), t("atWork"), t("sleeping"), t("inMeeting"), t("batteryLow")].map((preset) => (
               <button
                 key={preset}
-                onClick={() => { setAbout(preset); localStorage.setItem("cw_about", preset); }}
+                onClick={() => { setAbout(preset); localStorage.setItem("cw_about", preset); void persist({ about: preset }); }}
                 className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${about === preset ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}
               >
                 {preset}
@@ -170,8 +186,8 @@ function Profile() {
         </Row>
 
 
-        <Row icon="📱" label="Phone">
-          <div className="text-base">+91 {phone || "—"}</div>
+        <Row icon="✉️" label="Email">
+          <div className="text-base">{user?.email || "Not signed in"}</div>
         </Row>
       </section>
 
@@ -223,7 +239,7 @@ function Profile() {
 
       <div className="px-4 mt-8">
         <button
-          onClick={logout}
+          onClick={() => void logout()}
           className="w-full py-3 rounded-full border border-destructive text-destructive font-semibold text-sm hover:bg-destructive/5"
         >
           {t("logout")}
