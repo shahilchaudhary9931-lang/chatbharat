@@ -37,7 +37,7 @@ function Profile() {
     setPhone(profile.phone_number || "");
   }, [profile]);
 
-  const persist = async (patch: Record<string, string | null>) => {
+  const persist = async (patch: { username?: string | null; about?: string | null; avatar_url?: string | null }) => {
     if (!user) return;
     await supabase.from("profiles").update(patch).eq("id", user.id);
     await refreshProfile();
