@@ -24,8 +24,8 @@ function Login() {
     title: lang === "hi" ? "अपना ईमेल डालें" : "Enter your email",
     help:
       lang === "hi"
-        ? "हम आपको एक 6-अंकों का कोड और मैजिक लिंक भेजेंगे।"
-        : "We'll email you a 6-digit code and a magic link.",
+        ? "हम आपको एक 6-अंकों का कोड ईमेल करेंगे।"
+        : "We'll email you a 6-digit verification code.",
     email: lang === "hi" ? "ईमेल" : "Email",
     next: lang === "hi" ? "कोड भेजें" : "Send code",
     sending: lang === "hi" ? "भेजा जा रहा है…" : "Sending…",
@@ -44,7 +44,6 @@ function Login() {
       email: value,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/home`,
       },
     });
     setBusy(false);
