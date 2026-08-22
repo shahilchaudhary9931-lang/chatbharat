@@ -4,6 +4,9 @@ import { useI18n } from "@/lib/i18n";
 import { chats, stories, calls } from "@/lib/mock-data";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
+import { useAuth } from "@/lib/auth";
+import { fetchConversations, type Conversation } from "@/lib/chat-db";
+import { supabase } from "@/integrations/supabase/client";
 
 type MyStory = { id: string; src: string; kind: "image" | "video"; caption: string; createdAt: number };
 
@@ -21,6 +24,20 @@ function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [myStories, setMyStories] = useState<MyStory[]>([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [convos, setConvos] = useState<Conversation[]>([]);
+
+  useEffect(() => {
+    if (!user) { setConvos([]); return; }
+    let active = true;
+    const load = () => fetchConversations(user.id).then((c) => { if (active) setConvos(c); });
+    void load();
+    const channel = supabase
+      .channel("home-messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => void load())
+      .subscribe();
+    return () => { active = false; void supabase.removeChannel(channel); };
+  }, [user]);
 
   useEffect(() => {
     try { setMyStories(JSON.parse(localStorage.getItem("cw_my_stories") || "[]")); } catch { /* ignore */ }
@@ -109,6 +126,39 @@ function Home() {
       {/* Body */}
       {tab === "chats" && (
         <ul key="chats" className="flex-1 anim-stagger">
+          {convos
+            .filter((c) => !q.trim() || c.peerName.toLowerCase().includes(q.toLowerCase()) || c.lastMessage.toLowerCase().includes(q.toLowerCase()))
+            .map((c) => (
+              <li key={c.peerId}>
+                <Link
+                  to="/chat/$id"
+                  params={{ id: c.peerId }}
+                  className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40 hover-lift press"
+                >
+                  <Avatar name={c.peerName} hue={200} size={52} />
+                  <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold truncate">{c.peerName}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(c.lastAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <div className="text-sm truncate text-muted-foreground mt-0.5">{c.lastMessage}</div>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          {user && convos.length === 0 && (
+            <li className="px-4 py-4 text-center text-sm text-muted-foreground">
+              No real chats yet —{" "}
+              <Link to="/contacts" className="text-primary font-semibold">start one by email</Link>.
+            </li>
+          )}
+          {!user && (
+            <li className="px-4 py-4 text-center text-sm text-muted-foreground">
+              <Link to="/login" className="text-primary font-semibold">Sign in with email</Link> to chat for real.
+            </li>
+          )}
           {filtered.length === 0 && (
             <li className="text-center text-sm text-muted-foreground py-12">No chats found.</li>
           )}

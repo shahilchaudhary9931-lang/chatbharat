@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { Avatar } from "@/components/Avatar";
 import { addContact, useContacts } from "@/lib/contacts-store";
+import { findProfileByEmail } from "@/lib/chat-db";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/contacts")({
   component: ContactsPage,
@@ -16,6 +18,25 @@ function ContactsPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const { user } = useAuth();
+  const [chatEmail, setChatEmail] = useState("");
+  const [lookupBusy, setLookupBusy] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+
+  const startChat = async () => {
+    const value = chatEmail.trim().toLowerCase();
+    if (!value) return;
+    if (!user) { navigate({ to: "/login" }); return; }
+    setLookupBusy(true);
+    setLookupError(null);
+    const found = await findProfileByEmail(value);
+    setLookupBusy(false);
+    if (!found) {
+      setLookupError(lang === "hi" ? "इस ईमेल से कोई उपयोगकर्ता नहीं मिला" : "No ChatWave user with that email");
+      return;
+    }
+    navigate({ to: "/chat/$id", params: { id: found.id } });
+  };
 
   const labels = {
     title: lang === "hi" ? "संपर्क" : "Contacts",
@@ -71,6 +92,31 @@ function ContactsPage() {
             className="bg-transparent outline-none px-2 py-1 text-sm flex-1"
           />
         </div>
+      </div>
+
+      <div className="px-4 py-4 border-b border-border/60 bg-card/50">
+        <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">
+          {lang === "hi" ? "ईमेल से चैट शुरू करें" : "Start a chat by email"}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="email"
+            value={chatEmail}
+            onChange={(e) => setChatEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && void startChat()}
+            placeholder="friend@example.com"
+            className="flex-1 px-3 py-2 rounded-lg bg-input border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
+          />
+          <button
+            onClick={() => void startChat()}
+            disabled={lookupBusy}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60 press"
+            style={{ background: "var(--color-primary)" }}
+          >
+            {lookupBusy ? "…" : lang === "hi" ? "चैट" : "Chat"}
+          </button>
+        </div>
+        {lookupError && <p role="alert" className="mt-2 text-xs text-destructive">{lookupError}</p>}
       </div>
 
       <button
