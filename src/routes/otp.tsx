@@ -27,8 +27,8 @@ function Otp() {
     verifying: lang === "hi" ? "जाँच हो रही है…" : "Verifying…",
     hint:
       lang === "hi"
-        ? "ईमेल में मौजूद मैजिक लिंक पर टैप करके भी लॉगिन कर सकते हैं।"
-        : "You can also just tap the magic link in the email.",
+        ? "अपने ईमेल में मिला 6-अंकों का कोड यहाँ डालें। कोड 1 घंटे में एक्सपायर हो जाता है।"
+        : "Enter the 6-digit code from your email. The code expires in 1 hour.",
   };
 
   useEffect(() => {
@@ -53,7 +53,14 @@ function Otp() {
         setBusy(false);
         verifying.current = false;
         if (err) {
-          setError(err.message);
+          const expired = /expired|invalid/i.test(err.message);
+          setError(
+            expired
+              ? lang === "hi"
+                ? "कोड गलत या एक्सपायर हो चुका है। दोबारा कोड भेजें।"
+                : "That code is incorrect or has expired. Request a new one."
+              : err.message,
+          );
           setCode(["", "", "", "", "", ""]);
           refs.current[0]?.focus();
           return;
@@ -86,7 +93,7 @@ function Otp() {
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/home` },
+      options: { shouldCreateUser: true },
     });
     if (err) setError(err.message);
   };
