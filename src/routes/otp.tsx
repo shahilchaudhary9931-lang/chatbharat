@@ -15,6 +15,7 @@ function Otp() {
   const [email, setEmail] = useState("");
   const [seconds, setSeconds] = useState(45);
   const [busy, setBusy] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const verifying = useRef(false);
 
@@ -32,9 +33,14 @@ function Otp() {
   };
 
   useEffect(() => {
-    setEmail(localStorage.getItem("cw_email") || "");
+    const storedEmail = localStorage.getItem("cw_email") || "";
+    if (!storedEmail) {
+      navigate({ to: "/login", replace: true });
+      return;
+    }
+    setEmail(storedEmail);
     refs.current[0]?.focus();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -88,14 +94,21 @@ function Otp() {
   };
 
   const resend = async () => {
-    if (!email) return;
-    setSeconds(45);
+    if (!email || seconds > 0 || resending) return;
+    setResending(true);
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: true },
     });
-    if (err) setError(err.message);
+    setResending(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    setCode(["", "", "", "", "", ""]);
+    setSeconds(45);
+    refs.current[0]?.focus();
   };
 
   return (
@@ -134,8 +147,8 @@ function Otp() {
         {seconds > 0 ? (
           <span>00:{seconds.toString().padStart(2, "0")}</span>
         ) : (
-          <button onClick={resend} className="text-primary font-semibold">
-            {L.resend}
+          <button onClick={resend} disabled={resending} className="text-primary font-semibold disabled:opacity-60">
+            {resending ? L.verifying : L.resend}
           </button>
         )}
       </p>
