@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { lookupProfileByEmail } from "@/lib/profile-lookup.functions";
 
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -73,12 +72,4 @@ export async function sendDbMessage(userId: string, peerId: string, text: string
     .insert({ sender_id: userId, receiver_id: peerId, message_text: text })
     .select("id, sender_id, receiver_id, message_text, created_at")
     .maybeSingle();
-}
-
-export async function findProfileByEmail(email: string) {
-  try {
-    return await lookupProfileByEmail({ data: { email } });
-  } catch {
-    return null;
-  }
 }

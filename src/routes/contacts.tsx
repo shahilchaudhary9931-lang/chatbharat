@@ -1,68 +1,85 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { Avatar } from "@/components/Avatar";
-import { addContact, useContacts } from "@/lib/contacts-store";
-import { findProfileByEmail } from "@/lib/chat-db";
+import { searchProfilesByUsername } from "@/lib/profile-lookup.functions";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/contacts")({
+  head: () => ({
+    meta: [
+      { title: "Find Contacts | ChatWave" },
+      { name: "description", content: "Find registered ChatWave users by username and start a private chat." },
+      { property: "og:title", content: "Find Contacts | ChatWave" },
+      { property: "og:description", content: "Find registered ChatWave users by username and start a private chat." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ContactsPage,
 });
+
+interface SearchProfile {
+  id: string;
+  username: string | null;
+  about: string | null;
+  avatar_url: string | null;
+}
 
 function ContactsPage() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
-  const contacts = useContacts();
-  const [q, setQ] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const { user } = useAuth();
-  const [chatEmail, setChatEmail] = useState("");
-  const [lookupBusy, setLookupBusy] = useState(false);
-  const [lookupError, setLookupError] = useState<string | null>(null);
-
-  const startChat = async () => {
-    const value = chatEmail.trim().toLowerCase();
-    if (!value) return;
-    if (!user) { navigate({ to: "/login" }); return; }
-    setLookupBusy(true);
-    setLookupError(null);
-    const found = await findProfileByEmail(value);
-    setLookupBusy(false);
-    if (!found) {
-      setLookupError(lang === "hi" ? "इस ईमेल से कोई उपयोगकर्ता नहीं मिला" : "No ChatWave user with that email");
-      return;
-    }
-    navigate({ to: "/chat/$id", params: { id: found.id } });
-  };
+  const { user, loading: authLoading } = useAuth();
+  const searchProfiles = useServerFn(searchProfilesByUsername);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const [profiles, setProfiles] = useState<SearchProfile[]>([]);
+  const [searching, setSearching] = useState(true);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const labels = {
     title: lang === "hi" ? "संपर्क" : "Contacts",
     addContact: lang === "hi" ? "नया संपर्क" : "Add contact",
-    name: lang === "hi" ? "नाम" : "Name",
-    phone: lang === "hi" ? "फ़ोन नंबर" : "Phone number",
-    save: lang === "hi" ? "सेव करें" : "Save",
-    empty: lang === "hi" ? "कोई संपर्क नहीं" : "No contacts found",
-    namePh: lang === "hi" ? "पूरा नाम" : "Full name",
-    phonePh: "+91 98765 43210",
+    search: lang === "hi" ? "नाम या यूज़रनेम खोजें" : "Search name or username",
+    empty: lang === "hi" ? "कोई पंजीकृत उपयोगकर्ता नहीं मिला" : "No registered users found",
+    error: lang === "hi" ? "अभी उपयोगकर्ताओं को खोजा नहीं जा सका" : "Couldn't search users right now",
+    loading: lang === "hi" ? "उपयोगकर्ता खोज रहे हैं…" : "Finding users…",
+    registered: lang === "hi" ? "पंजीकृत उपयोगकर्ता" : "Registered users",
   };
 
-  const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return contacts;
-    return contacts.filter(
-      (c) => c.name.toLowerCase().includes(s) || c.phone.toLowerCase().includes(s),
-    );
-  }, [q, contacts]);
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
 
-  const submit = () => {
-    if (!name.trim() || !phone.trim()) return;
-    addContact({ name: name.trim(), phone: phone.trim() });
-    setName("");
-    setPhone("");
-    setShowAdd(false);
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      setSearching(true);
+      setSearchError(null);
+      try {
+        const matches = await searchProfiles({ data: { query: query.trim() } });
+        if (active) setProfiles(matches as SearchProfile[]);
+      } catch {
+        if (active) {
+          setProfiles([]);
+          setSearchError(labels.error);
+        }
+      } finally {
+        if (active) setSearching(false);
+      }
+    }, query.trim() ? 250 : 0);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [authLoading, user, query, navigate, searchProfiles, labels.error]);
+
+  const openChat = (profileId: string) => {
+    navigate({ to: "/chat/$id", params: { id: profileId } });
   };
 
   return (
@@ -76,7 +93,7 @@ function ContactsPage() {
         </button>
         <div className="flex-1">
           <div className="font-semibold text-lg leading-tight">{labels.title}</div>
-          <div className="text-xs opacity-80">{contacts.length} {t("participants")}</div>
+          <div className="text-xs opacity-80">{labels.registered}</div>
         </div>
       </header>
 
@@ -86,41 +103,18 @@ function ContactsPage() {
             <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" strokeLinecap="round" />
           </svg>
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchPlaceholder")}
+            ref={searchRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={labels.search}
+            autoComplete="off"
             className="bg-transparent outline-none px-2 py-1 text-sm flex-1"
           />
         </div>
       </div>
 
-      <div className="px-4 py-4 border-b border-border/60 bg-card/50">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">
-          {lang === "hi" ? "ईमेल से चैट शुरू करें" : "Start a chat by email"}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="email"
-            value={chatEmail}
-            onChange={(e) => setChatEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && void startChat()}
-            placeholder="friend@example.com"
-            className="flex-1 px-3 py-2 rounded-lg bg-input border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
-          />
-          <button
-            onClick={() => void startChat()}
-            disabled={lookupBusy}
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60 press"
-            style={{ background: "var(--color-primary)" }}
-          >
-            {lookupBusy ? "…" : lang === "hi" ? "चैट" : "Chat"}
-          </button>
-        </div>
-        {lookupError && <p role="alert" className="mt-2 text-xs text-destructive">{lookupError}</p>}
-      </div>
-
       <button
-        onClick={() => setShowAdd(true)}
+        onClick={() => searchRef.current?.focus()}
         className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 border-b border-border/60"
       >
         <div
@@ -133,60 +127,34 @@ function ContactsPage() {
       </button>
 
       <ul className="flex-1">
-        {filtered.length === 0 && (
+        {searching && (
+          <li className="text-center text-sm text-muted-foreground py-12" aria-live="polite">{labels.loading}</li>
+        )}
+        {!searching && searchError && (
+          <li role="alert" className="text-center text-sm text-destructive py-12">{searchError}</li>
+        )}
+        {!searching && !searchError && profiles.length === 0 && (
           <li className="text-center text-sm text-muted-foreground py-12">{labels.empty}</li>
         )}
-        {filtered.map((c) => (
-          <li key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
-            <Avatar name={c.name} hue={c.avatarHue} size={48} online={c.online} />
-            <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
-              <div className="font-semibold truncate">{c.name}</div>
-              <div className="text-xs text-muted-foreground truncate">{c.about}</div>
-              <div className="text-xs text-muted-foreground truncate">{c.phone}</div>
-            </div>
+        {!searching && profiles.map((profile) => (
+          <li key={profile.id}>
+            <button
+              type="button"
+              onClick={() => openChat(profile.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/40 active:bg-muted/60 press"
+            >
+              <Avatar name={profile.username || "User"} hue={200} size={48} />
+              <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
+                <div className="font-semibold truncate">{profile.username || (lang === "hi" ? "उपयोगकर्ता" : "User")}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {profile.about || (lang === "hi" ? "चैट शुरू करने के लिए टैप करें" : "Tap to start chatting")}
+                </div>
+              </div>
+              <svg className="text-muted-foreground" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </button>
           </li>
         ))}
       </ul>
-
-      {showAdd && (
-        <div className="fixed inset-0 z-40 bg-black/50 flex items-end sm:items-center justify-center" onClick={() => setShowAdd(false)}>
-          <div
-            className="w-full max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-5 animate-[sheet-up_.2s_ease-out]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="font-semibold text-lg mb-4">{labels.addContact}</div>
-            <label className="block text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">{labels.name}</label>
-            <input
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={labels.namePh}
-              className="w-full border-b border-border focus:border-primary outline-none py-2 mb-4 bg-transparent"
-            />
-            <label className="block text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">{labels.phone}</label>
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={labels.phonePh}
-              type="tel"
-              className="w-full border-b border-border focus:border-primary outline-none py-2 mb-6 bg-transparent"
-            />
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setShowAdd(false)} className="px-4 py-2 rounded-full text-sm font-semibold text-muted-foreground hover:bg-muted">
-                {t("cancel")}
-              </button>
-              <button
-                onClick={submit}
-                disabled={!name.trim() || !phone.trim()}
-                className="px-5 py-2 rounded-full text-sm font-semibold text-white disabled:opacity-50"
-                style={{ background: "var(--color-primary)" }}
-              >
-                {labels.save}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
