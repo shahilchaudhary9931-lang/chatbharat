@@ -151,7 +151,7 @@ function Home() {
           {user && convos.length === 0 && (
             <li className="px-4 py-4 text-center text-sm text-muted-foreground">
               No real chats yet —{" "}
-              <Link to="/contacts" className="text-primary font-semibold">start one by email</Link>.
+              <Link to="/contacts" className="text-primary font-semibold">find someone by username</Link>.
             </li>
           )}
           {!user && (

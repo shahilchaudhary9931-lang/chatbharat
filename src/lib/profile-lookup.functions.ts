@@ -4,25 +4,33 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const inputSchema = z.object({
-  email: z.string().trim().toLowerCase().email().max(254),
+  query: z.string().trim().max(60),
 });
 
-export const lookupProfileByEmail = createServerFn({ method: "POST" })
+export const searchProfilesByUsername = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inputSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profile, error } = await supabaseAdmin
+    let request = supabaseAdmin
       .from("profiles")
-      .select("id, username, email")
-      .eq("email", data.email)
+      .select("id, username, about, avatar_url")
       .neq("id", context.userId)
-      .maybeSingle();
+      .not("username", "is", null)
+      .order("username", { ascending: true })
+      .limit(30);
 
-    if (error) {
-      console.error("Profile lookup failed", { code: error.code });
-      throw new Error("Unable to search for that user right now");
+    if (data.query) {
+      const escapedQuery = data.query.replaceAll("%", "\\%").replaceAll("_", "\\_");
+      request = request.ilike("username", `%${escapedQuery}%`);
     }
 
-    return profile;
+    const { data: profiles, error } = await request;
+
+    if (error) {
+      console.error("Profile search failed", { code: error.code });
+      throw new Error("Unable to search users right now");
+    }
+
+    return profiles ?? [];
   });
