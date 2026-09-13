@@ -7,6 +7,10 @@ const inputSchema = z.object({
   query: z.string().trim().max(60),
 });
 
+const profileIdSchema = z.object({
+  profileId: z.string().uuid(),
+});
+
 export const searchProfilesByUsername = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inputSchema.parse(input))
@@ -33,4 +37,25 @@ export const searchProfilesByUsername = createServerFn({ method: "POST" })
     }
 
     return profiles ?? [];
+  });
+
+export const getChatProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => profileIdSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    if (data.profileId === context.userId) throw new Error("Cannot open a chat with yourself");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profile, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, username")
+      .eq("id", data.profileId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Chat profile lookup failed", { code: error.code });
+      throw new Error("Unable to open this chat right now");
+    }
+
+    return profile;
   });
