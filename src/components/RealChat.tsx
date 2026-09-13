@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
 import { fetchThread, sendDbMessage, type DbMessage } from "@/lib/chat-db";
 import { useI18n } from "@/lib/i18n";
+import { getChatProfile } from "@/lib/profile-lookup.functions";
 
 function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -15,6 +17,7 @@ export function RealChat({ peerId }: { peerId: string }) {
   const { user, loading } = useAuth();
   const { lang } = useI18n();
   const navigate = useNavigate();
+  const fetchChatProfile = useServerFn(getChatProfile);
   const [messages, setMessages] = useState<DbMessage[]>([]);
   const [peerName, setPeerName] = useState("Chat");
   const [draft, setDraft] = useState("");
@@ -38,12 +41,12 @@ export function RealChat({ peerId }: { peerId: string }) {
     }
     let active = true;
     (async () => {
-      const [{ data: prof }, thread] = await Promise.all([
-        supabase.from("profiles").select("username, email").eq("id", peerId).maybeSingle(),
+      const [prof, thread] = await Promise.all([
+        fetchChatProfile({ data: { profileId: peerId } }),
         fetchThread(user.id, peerId),
       ]);
       if (!active) return;
-      setPeerName(prof?.username || prof?.email || "Chat");
+      setPeerName(prof?.username || "Chat");
       setMessages(thread);
       setReady(true);
     })();
@@ -67,7 +70,7 @@ export function RealChat({ peerId }: { peerId: string }) {
       active = false;
       void supabase.removeChannel(channel);
     };
-  }, [user, loading, peerId, navigate]);
+  }, [user, loading, peerId, navigate, fetchChatProfile]);
 
   useEffect(() => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight });
