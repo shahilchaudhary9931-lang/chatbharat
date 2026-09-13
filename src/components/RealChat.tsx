@@ -22,7 +22,9 @@ export function RealChat({ peerId }: { peerId: string }) {
   const [peerName, setPeerName] = useState("Chat");
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const L = useMemo(
     () => ({
@@ -62,6 +64,14 @@ export function RealChat({ peerId }: { peerId: string }) {
           const theirs = m.sender_id === peerId && m.receiver_id === user.id;
           if (!mine && !theirs) return;
           setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages" },
+        (payload) => {
+          const old = payload.old as { id?: string };
+          if (old?.id) setMessages((prev) => prev.filter((x) => x.id !== old.id));
         },
       )
       .subscribe();
