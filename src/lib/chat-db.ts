@@ -73,3 +73,16 @@ export async function sendDbMessage(userId: string, peerId: string, text: string
     .select("id, sender_id, receiver_id, message_text, created_at")
     .maybeSingle();
 }
+
+export async function deleteDbMessage(id: string) {
+  return supabase.from("messages").delete().eq("id", id);
+}
+
+export async function deleteConversation(userId: string, peerId: string) {
+  return supabase
+    .from("messages")
+    .delete()
+    .or(
+      `and(sender_id.eq.${userId},receiver_id.eq.${peerId}),and(sender_id.eq.${peerId},receiver_id.eq.${userId})`,
+    );
+}
