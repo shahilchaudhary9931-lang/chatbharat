@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
-import { fetchThread, sendDbMessage, type DbMessage } from "@/lib/chat-db";
+import { fetchThread, sendDbMessage, deleteDbMessage, type DbMessage } from "@/lib/chat-db";
 import { useI18n } from "@/lib/i18n";
 import { getChatProfile } from "@/lib/profile-lookup.functions";
 
@@ -22,13 +22,17 @@ export function RealChat({ peerId }: { peerId: string }) {
   const [peerName, setPeerName] = useState("Chat");
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const L = useMemo(
     () => ({
       placeholder: lang === "hi" ? "संदेश लिखें" : "Type a message",
       empty: lang === "hi" ? "अभी कोई संदेश नहीं" : "No messages yet — say hello 👋",
       online: lang === "hi" ? "ऑनलाइन" : "online",
+      deleteMsg: lang === "hi" ? "संदेश हटाएँ" : "Delete message",
+      cancel: lang === "hi" ? "रद्द करें" : "Cancel",
     }),
     [lang],
   );
@@ -64,6 +68,14 @@ export function RealChat({ peerId }: { peerId: string }) {
           setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages" },
+        (payload) => {
+          const old = payload.old as { id?: string };
+          if (old?.id) setMessages((prev) => prev.filter((x) => x.id !== old.id));
+        },
+      )
       .subscribe();
 
     return () => {
@@ -85,6 +97,22 @@ export function RealChat({ peerId }: { peerId: string }) {
       const m = data as DbMessage;
       setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
     }
+  };
+
+  const startPress = (id: string) => {
+    pressTimer.current = setTimeout(() => setDeletingId(id), 450);
+  };
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    const id = deletingId;
+    setDeletingId(null);
+    setMessages((prev) => prev.filter((x) => x.id !== id));
+    await deleteDbMessage(id);
   };
 
   return (
