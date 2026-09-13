@@ -31,6 +31,8 @@ export function RealChat({ peerId }: { peerId: string }) {
       placeholder: lang === "hi" ? "संदेश लिखें" : "Type a message",
       empty: lang === "hi" ? "अभी कोई संदेश नहीं" : "No messages yet — say hello 👋",
       online: lang === "hi" ? "ऑनलाइन" : "online",
+      deleteMsg: lang === "hi" ? "संदेश हटाएँ" : "Delete message",
+      cancel: lang === "hi" ? "रद्द करें" : "Cancel",
     }),
     [lang],
   );
@@ -95,6 +97,22 @@ export function RealChat({ peerId }: { peerId: string }) {
       const m = data as DbMessage;
       setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
     }
+  };
+
+  const startPress = (id: string) => {
+    pressTimer.current = setTimeout(() => setDeletingId(id), 450);
+  };
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    const id = deletingId;
+    setDeletingId(null);
+    setMessages((prev) => prev.filter((x) => x.id !== id));
+    await deleteDbMessage(id);
   };
 
   return (
