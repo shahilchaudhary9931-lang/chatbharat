@@ -145,7 +145,16 @@ function Home() {
           {convos
             .filter((c) => !q.trim() || c.peerName.toLowerCase().includes(q.toLowerCase()) || c.lastMessage.toLowerCase().includes(q.toLowerCase()))
             .map((c) => (
-              <li key={c.peerId}>
+              <li
+                key={c.peerId}
+                onPointerDown={() => startPress(c)}
+                onPointerUp={cancelPress}
+                onPointerLeave={cancelPress}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setDeletingPeer(c);
+                }}
+              >
                 <Link
                   to="/chat/$id"
                   params={{ id: c.peerId }}
@@ -329,6 +338,37 @@ function Home() {
         {tab === "status" && <CameraIcon />}
         {tab === "calls" && <NewChatIcon />}
       </button>
+
+      {deletingPeer && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade"
+          onClick={() => setDeletingPeer(null)}
+        >
+          <div
+            className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl overflow-hidden anim-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 text-sm text-muted-foreground border-b border-border truncate">
+              {deletingPeer.peerName}
+            </div>
+            <button
+              onClick={() => void confirmDeleteChat()}
+              className="w-full px-4 py-3.5 text-sm font-semibold text-destructive hover:bg-muted/60 press flex items-center justify-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+              </svg>
+              Delete chat
+            </button>
+            <button
+              onClick={() => setDeletingPeer(null)}
+              className="w-full px-4 py-3.5 text-sm hover:bg-muted/60 press border-t border-border"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
