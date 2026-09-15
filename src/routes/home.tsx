@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { chats, stories, calls } from "@/lib/mock-data";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
 import { useAuth } from "@/lib/auth";
-import { fetchConversations, type Conversation } from "@/lib/chat-db";
+import { fetchConversations, deleteConversation, type Conversation } from "@/lib/chat-db";
 import { supabase } from "@/integrations/supabase/client";
 
 type MyStory = { id: string; src: string; kind: "image" | "video"; caption: string; createdAt: number };
@@ -26,6 +26,22 @@ function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [convos, setConvos] = useState<Conversation[]>([]);
+  const [deletingPeer, setDeletingPeer] = useState<Conversation | null>(null);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startPress = (c: Conversation) => {
+    pressTimer.current = setTimeout(() => setDeletingPeer(c), 450);
+  };
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  };
+  const confirmDeleteChat = async () => {
+    if (!deletingPeer || !user) return;
+    const peer = deletingPeer;
+    setDeletingPeer(null);
+    setConvos((prev) => prev.filter((c) => c.peerId !== peer.peerId));
+    await deleteConversation(user.id, peer.peerId);
+  };
 
   useEffect(() => {
     if (!user) { setConvos([]); return; }
@@ -129,7 +145,16 @@ function Home() {
           {convos
             .filter((c) => !q.trim() || c.peerName.toLowerCase().includes(q.toLowerCase()) || c.lastMessage.toLowerCase().includes(q.toLowerCase()))
             .map((c) => (
-              <li key={c.peerId}>
+              <li
+                key={c.peerId}
+                onPointerDown={() => startPress(c)}
+                onPointerUp={cancelPress}
+                onPointerLeave={cancelPress}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setDeletingPeer(c);
+                }}
+              >
                 <Link
                   to="/chat/$id"
                   params={{ id: c.peerId }}
@@ -313,6 +338,37 @@ function Home() {
         {tab === "status" && <CameraIcon />}
         {tab === "calls" && <NewChatIcon />}
       </button>
+
+      {deletingPeer && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade"
+          onClick={() => setDeletingPeer(null)}
+        >
+          <div
+            className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl overflow-hidden anim-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 text-sm text-muted-foreground border-b border-border truncate">
+              {deletingPeer.peerName}
+            </div>
+            <button
+              onClick={() => void confirmDeleteChat()}
+              className="w-full px-4 py-3.5 text-sm font-semibold text-destructive hover:bg-muted/60 press flex items-center justify-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+              </svg>
+              Delete chat
+            </button>
+            <button
+              onClick={() => setDeletingPeer(null)}
+              className="w-full px-4 py-3.5 text-sm hover:bg-muted/60 press border-t border-border"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

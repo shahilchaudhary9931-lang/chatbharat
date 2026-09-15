@@ -140,10 +140,17 @@ export function RealChat({ peerId }: { peerId: string }) {
           return (
             <div key={m.id} className={`flex ${fromMe ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm anim-bubble ${fromMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
+                className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm anim-bubble select-none ${fromMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
                 style={{
                   background: fromMe ? "var(--color-bubble-out)" : "var(--color-bubble-in)",
                   color: "var(--color-foreground)",
+                }}
+                onPointerDown={() => startPress(m.id)}
+                onPointerUp={cancelPress}
+                onPointerLeave={cancelPress}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setDeletingId(m.id);
                 }}
               >
                 <span className="whitespace-pre-wrap break-words">{m.message_text}</span>
@@ -176,6 +183,34 @@ export function RealChat({ peerId }: { peerId: string }) {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7Z" /></svg>
         </button>
       </div>
+
+      {deletingId && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade"
+          onClick={() => setDeletingId(null)}
+        >
+          <div
+            className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl overflow-hidden anim-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => void confirmDelete()}
+              className="w-full px-4 py-3.5 text-sm font-semibold text-destructive hover:bg-muted/60 press flex items-center justify-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+              </svg>
+              {L.deleteMsg}
+            </button>
+            <button
+              onClick={() => setDeletingId(null)}
+              className="w-full px-4 py-3.5 text-sm hover:bg-muted/60 press border-t border-border"
+            >
+              {L.cancel}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
