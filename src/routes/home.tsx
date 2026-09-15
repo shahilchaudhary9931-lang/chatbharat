@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { chats, stories, calls } from "@/lib/mock-data";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
 import { useAuth } from "@/lib/auth";
-import { fetchConversations, type Conversation } from "@/lib/chat-db";
+import { fetchConversations, deleteConversation, type Conversation } from "@/lib/chat-db";
 import { supabase } from "@/integrations/supabase/client";
 
 type MyStory = { id: string; src: string; kind: "image" | "video"; caption: string; createdAt: number };
@@ -26,6 +26,22 @@ function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [convos, setConvos] = useState<Conversation[]>([]);
+  const [deletingPeer, setDeletingPeer] = useState<Conversation | null>(null);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startPress = (c: Conversation) => {
+    pressTimer.current = setTimeout(() => setDeletingPeer(c), 450);
+  };
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  };
+  const confirmDeleteChat = async () => {
+    if (!deletingPeer || !user) return;
+    const peer = deletingPeer;
+    setDeletingPeer(null);
+    setConvos((prev) => prev.filter((c) => c.peerId !== peer.peerId));
+    await deleteConversation(user.id, peer.peerId);
+  };
 
   useEffect(() => {
     if (!user) { setConvos([]); return; }
