@@ -140,10 +140,17 @@ export function RealChat({ peerId }: { peerId: string }) {
           return (
             <div key={m.id} className={`flex ${fromMe ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm anim-bubble ${fromMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
+                className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm anim-bubble select-none ${fromMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
                 style={{
                   background: fromMe ? "var(--color-bubble-out)" : "var(--color-bubble-in)",
                   color: "var(--color-foreground)",
+                }}
+                onPointerDown={() => startPress(m.id)}
+                onPointerUp={cancelPress}
+                onPointerLeave={cancelPress}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setDeletingId(m.id);
                 }}
               >
                 <span className="whitespace-pre-wrap break-words">{m.message_text}</span>
