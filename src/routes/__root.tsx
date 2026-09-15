@@ -15,6 +15,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { AppLockGate } from "@/components/AppLockGate";
 import { AuthProvider } from "@/lib/auth";
+import { MessageNotifier } from "@/components/MessageNotifier";
 
 function NotFoundComponent() {
   return (
