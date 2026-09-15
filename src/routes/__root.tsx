@@ -105,6 +105,7 @@ function RootComponent() {
               <Outlet />
             </div>
             <AppLockGate />
+            <MessageNotifier />
           </div>
           </AuthProvider>
         </I18nProvider>
