@@ -24,7 +24,7 @@ function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [myStories, setMyStories] = useState<MyStory[]>([]);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [convos, setConvos] = useState<Conversation[]>([]);
   const [deletingPeer, setDeletingPeer] = useState<Conversation | null>(null);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
