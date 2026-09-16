@@ -250,7 +250,7 @@ function Home() {
                   </div>
                 </div>
               ) : (
-                <Avatar name="You" hue={170} size={52} />
+                <Avatar name={profile?.username || "You"} hue={170} size={52} src={profile?.avatar_url} />
               )}
               <span
                 className="absolute -bottom-0.5 -right-0.5 rounded-full bg-primary text-primary-foreground w-5 h-5 flex items-center justify-center text-sm font-bold border-2 border-background"

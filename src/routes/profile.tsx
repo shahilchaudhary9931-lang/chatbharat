@@ -143,6 +143,16 @@ function Profile() {
         )}
       </div>
 
+      <div className="px-4 pb-4">
+        <button
+          onClick={() => navigate({ to: "/edit-profile" })}
+          className="w-full py-3 rounded-full text-white font-semibold text-sm shadow press"
+          style={{ background: "var(--color-primary)" }}
+        >
+          {lang === "hi" ? "प्रोफ़ाइल संपादित करें" : "Edit Profile"}
+        </button>
+      </div>
+
       {/* Fields */}
       <section className="px-4 space-y-1">
         <Row icon="👤" label={t("yourName")}>
