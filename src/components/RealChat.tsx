@@ -99,6 +99,11 @@ export function RealChat({ peerId }: { peerId: string }) {
       const m = data as DbMessage;
       setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
     }
+    try {
+      await pushNewMessage({ data: { receiverId: peerId, text } });
+    } catch (err) {
+      console.error("Push notification failed", err);
+    }
   };
 
   const startPress = (id: string) => {
