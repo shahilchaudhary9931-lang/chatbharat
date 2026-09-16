@@ -1,87 +1,83 @@
-import { useEffect, useRef } from "react";
-import { useRouterState, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { getChatProfile } from "@/lib/profile-lookup.functions";
-import type { DbMessage } from "@/lib/chat-db";
+import { getVapidPublicKey, savePushSubscription } from "@/lib/push.functions";
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = window.atob(base64);
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
+  return output;
+}
 
 /**
- * Listens for incoming 1-to-1 messages and raises a browser notification
- * when the matching chat is not the visible screen.
+ * Registers the messaging service worker and stores the user's web-push
+ * subscription so the backend can deliver notifications for new messages.
  */
 export function MessageNotifier() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const pathRef = useRef(pathname);
-  pathRef.current = pathname;
-  const fetchChatProfile = useServerFn(getChatProfile);
-  const nameCache = useRef(new Map<string, string>());
+  const fetchVapidKey = useServerFn(getVapidPublicKey);
+  const saveSubscription = useServerFn(savePushSubscription);
 
-  // Ask for permission on the first user interaction (browsers require a gesture).
   useEffect(() => {
     if (!user) return;
-    if (typeof window === "undefined" || !("Notification" in window)) return;
-    if (Notification.permission !== "default") return;
-    const ask = () => {
-      void Notification.requestPermission();
-      window.removeEventListener("pointerdown", ask);
+    if (typeof window === "undefined") return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return;
+
+    let cancelled = false;
+
+    const enable = async () => {
+      try {
+        if (Notification.permission === "denied") return;
+        if (Notification.permission === "default") {
+          const result = await Notification.requestPermission();
+          if (result !== "granted") return;
+        }
+
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        await navigator.serviceWorker.ready;
+        if (cancelled) return;
+
+        const { publicKey } = await fetchVapidKey({});
+        if (!publicKey || cancelled) return;
+
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey),
+          });
+        }
+
+        const json = subscription.toJSON();
+        if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
+
+        await saveSubscription({
+          data: { endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth },
+        });
+      } catch (err) {
+        console.error("Push setup failed", err);
+      }
     };
-    window.addEventListener("pointerdown", ask, { once: true });
-    return () => window.removeEventListener("pointerdown", ask);
-  }, [user]);
 
-  useEffect(() => {
-    if (!user) return;
-    if (typeof window === "undefined" || !("Notification" in window)) return;
-
-    const channel = supabase
-      .channel(`notify-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${user.id}` },
-        (payload) => {
-          const m = payload.new as DbMessage;
-          if (!m || m.sender_id === user.id) return;
-          if (Notification.permission !== "granted") return;
-
-          const chatOpen =
-            pathRef.current.startsWith(`/chat/${m.sender_id}`) &&
-            typeof document !== "undefined" &&
-            document.visibilityState === "visible";
-          if (chatOpen) return;
-
-          void (async () => {
-            let name = nameCache.current.get(m.sender_id);
-            if (!name) {
-              try {
-                const prof = await fetchChatProfile({ data: { profileId: m.sender_id } });
-                name = prof?.username || "New message";
-              } catch {
-                name = "New message";
-              }
-              nameCache.current.set(m.sender_id, name);
-            }
-            const n = new Notification(name, {
-              body: m.message_text.slice(0, 120),
-              tag: `chat-${m.sender_id}`,
-              icon: "/favicon.ico",
-            });
-            n.onclick = () => {
-              window.focus();
-              void navigate({ to: "/chat/$id", params: { id: m.sender_id } });
-              n.close();
-            };
-          })();
-        },
-      )
-      .subscribe();
+    // Permission prompts need a user gesture on most browsers.
+    if (Notification.permission === "granted") {
+      void enable();
+    } else {
+      const onGesture = () => void enable();
+      window.addEventListener("pointerdown", onGesture, { once: true });
+      return () => {
+        cancelled = true;
+        window.removeEventListener("pointerdown", onGesture);
+      };
+    }
 
     return () => {
-      void supabase.removeChannel(channel);
+      cancelled = true;
     };
-  }, [user, navigate, fetchChatProfile]);
+  }, [user, fetchVapidKey, saveSubscription]);
 
   return null;
 }
