@@ -143,7 +143,7 @@ function ContactsPage() {
               onClick={() => openChat(profile.id)}
               className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/40 active:bg-muted/60 press"
             >
-              <Avatar name={profile.username || "User"} hue={200} size={48} />
+              <Avatar name={profile.username || "User"} hue={200} size={48} src={profile.avatar_url} />
               <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                 <div className="font-semibold truncate">{profile.username || (lang === "hi" ? "उपयोगकर्ता" : "User")}</div>
                 <div className="text-xs text-muted-foreground truncate">

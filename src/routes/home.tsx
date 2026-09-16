@@ -160,7 +160,7 @@ function Home() {
                   params={{ id: c.peerId }}
                   className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40 hover-lift press"
                 >
-                  <Avatar name={c.peerName} hue={200} size={52} />
+                  <Avatar name={c.peerName} hue={200} size={52} src={c.peerAvatar} />
                   <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold truncate">{c.peerName}</span>
