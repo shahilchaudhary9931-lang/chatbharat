@@ -8,6 +8,7 @@ import { Ticks } from "@/components/Ticks";
 import { fetchThread, sendDbMessage, deleteDbMessage, type DbMessage } from "@/lib/chat-db";
 import { useI18n } from "@/lib/i18n";
 import { getChatProfile } from "@/lib/profile-lookup.functions";
+import { notifyNewMessage } from "@/lib/push.functions";
 
 function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -18,6 +19,7 @@ export function RealChat({ peerId }: { peerId: string }) {
   const { lang } = useI18n();
   const navigate = useNavigate();
   const fetchChatProfile = useServerFn(getChatProfile);
+  const pushNewMessage = useServerFn(notifyNewMessage);
   const [messages, setMessages] = useState<DbMessage[]>([]);
   const [peerName, setPeerName] = useState("Chat");
   const [draft, setDraft] = useState("");
@@ -96,6 +98,11 @@ export function RealChat({ peerId }: { peerId: string }) {
     if (data) {
       const m = data as DbMessage;
       setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+    }
+    try {
+      await pushNewMessage({ data: { receiverId: peerId, text } });
+    } catch (err) {
+      console.error("Push notification failed", err);
     }
   };
 
