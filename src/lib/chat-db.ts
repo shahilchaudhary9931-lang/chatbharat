@@ -13,6 +13,7 @@ export interface DbMessage {
 export interface Conversation {
   peerId: string;
   peerName: string;
+  peerAvatar: string | null;
   lastMessage: string;
   lastAt: string;
 }
@@ -35,19 +36,18 @@ export async function fetchConversations(userId: string): Promise<Conversation[]
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, email")
+    .select("id, username, email, avatar_url")
     .in("id", peerIds);
 
-  const nameOf = (id: string) => {
-    const p = profiles?.find((x) => x.id === id);
-    return p?.username || p?.email || "Unknown";
-  };
+  const profileOf = (id: string) => profiles?.find((x) => x.id === id);
 
   return peerIds.map((peerId) => {
     const m = byPeer.get(peerId)!;
+    const p = profileOf(peerId);
     return {
       peerId,
-      peerName: nameOf(peerId),
+      peerName: p?.username || p?.email || "Unknown",
+      peerAvatar: p?.avatar_url ?? null,
       lastMessage: m.message_text,
       lastAt: m.created_at,
     };

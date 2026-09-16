@@ -48,7 +48,7 @@ export const getChatProfile = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: profile, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, username")
+      .select("id, username, avatar_url")
       .eq("id", data.profileId)
       .maybeSingle();
 
