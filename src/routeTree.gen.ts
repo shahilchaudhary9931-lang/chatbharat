@@ -17,6 +17,7 @@ import { Route as NewGroupRouteImport } from './routes/new-group'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsSessionsRouteImport } from './routes/settings.sessions'
@@ -70,6 +71,11 @@ const LoginRoute = LoginRouteImport.update({
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditProfileRoute = EditProfileRouteImport.update({
+  id: '/edit-profile',
+  path: '/edit-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactsRoute = ContactsRouteImport.update({
@@ -149,6 +155,7 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contacts': typeof ContactsRoute
+  '/edit-profile': typeof EditProfileRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contacts': typeof ContactsRoute
+  '/edit-profile': typeof EditProfileRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/contacts': typeof ContactsRoute
+  '/edit-profile': typeof EditProfileRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/contacts'
+    | '/edit-profile'
     | '/home'
     | '/login'
     | '/mcp'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/contacts'
+    | '/edit-profile'
     | '/home'
     | '/login'
     | '/mcp'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/contacts'
+    | '/edit-profile'
     | '/home'
     | '/login'
     | '/mcp'
@@ -297,6 +309,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContactsRoute: typeof ContactsRoute
+  EditProfileRoute: typeof EditProfileRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
@@ -368,6 +381,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/edit-profile': {
+      id: '/edit-profile'
+      path: '/edit-profile'
+      fullPath: '/edit-profile'
+      preLoaderRoute: typeof EditProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contacts': {
@@ -498,6 +518,7 @@ const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContactsRoute: ContactsRoute,
+  EditProfileRoute: EditProfileRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,

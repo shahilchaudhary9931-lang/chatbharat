@@ -22,6 +22,7 @@ export function RealChat({ peerId }: { peerId: string }) {
   const pushNewMessage = useServerFn(notifyNewMessage);
   const [messages, setMessages] = useState<DbMessage[]>([]);
   const [peerName, setPeerName] = useState("Chat");
+  const [peerAvatar, setPeerAvatar] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,6 +54,7 @@ export function RealChat({ peerId }: { peerId: string }) {
       ]);
       if (!active) return;
       setPeerName(prof?.username || "Chat");
+      setPeerAvatar(prof?.avatar_url ?? null);
       setMessages(thread);
       setReady(true);
     })();
@@ -131,7 +133,7 @@ export function RealChat({ peerId }: { peerId: string }) {
         <button onClick={() => navigate({ to: "/home" })} className="p-1.5 rounded-full hover:bg-white/10 press" aria-label="back">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
-        <Avatar name={peerName} hue={200} size={38} />
+        <Avatar name={peerName} hue={200} size={38} src={peerAvatar} />
         <div className="flex-1 min-w-0">
           <div className="font-semibold leading-tight truncate">{peerName}</div>
           <div className="text-[11px] opacity-80">{L.online}</div>
