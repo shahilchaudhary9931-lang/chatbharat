@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useContactNames } from "@/lib/contact-names";
 import { chats, stories, calls } from "@/lib/mock-data";
 import { Avatar } from "@/components/Avatar";
 import { Ticks } from "@/components/Ticks";
@@ -18,6 +19,7 @@ type Tab = "chats" | "status" | "calls";
 
 function Home() {
   const { t } = useI18n();
+  const { displayName } = useContactNames();
   const [tab, setTab] = useState<Tab>("chats");
   const [q, setQ] = useState("");
   const [searchOpen, setSearchOpen] = useState(true);
@@ -143,7 +145,7 @@ function Home() {
       {tab === "chats" && (
         <ul key="chats" className="flex-1 anim-stagger">
           {convos
-            .filter((c) => !q.trim() || c.peerName.toLowerCase().includes(q.toLowerCase()) || c.lastMessage.toLowerCase().includes(q.toLowerCase()))
+            .filter((c) => !q.trim() || displayName(c.peerId, c.peerName).toLowerCase().includes(q.toLowerCase()) || c.lastMessage.toLowerCase().includes(q.toLowerCase()))
             .map((c) => (
               <li
                 key={c.peerId}
@@ -160,10 +162,10 @@ function Home() {
                   params={{ id: c.peerId }}
                   className="flex items-center gap-3 px-4 py-3 active:bg-muted/60 hover:bg-muted/40 hover-lift press"
                 >
-                  <Avatar name={c.peerName} hue={200} size={52} src={c.peerAvatar} />
+                  <Avatar name={displayName(c.peerId, c.peerName)} hue={200} size={52} src={c.peerAvatar} />
                   <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold truncate">{c.peerName}</span>
+                      <span className="font-semibold truncate">{displayName(c.peerId, c.peerName)}</span>
                       <span className="text-xs text-muted-foreground">
                         {new Date(c.lastAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>

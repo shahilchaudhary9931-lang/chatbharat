@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { Avatar } from "@/components/Avatar";
 import { searchProfilesByUsername } from "@/lib/profile-lookup.functions";
 import { useAuth } from "@/lib/auth";
+import { useContactNames } from "@/lib/contact-names";
 
 export const Route = createFileRoute("/contacts")({
   head: () => ({
@@ -31,6 +32,7 @@ function ContactsPage() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { displayName } = useContactNames();
   const searchProfiles = useServerFn(searchProfilesByUsername);
   const searchRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -143,9 +145,9 @@ function ContactsPage() {
               onClick={() => openChat(profile.id)}
               className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/40 active:bg-muted/60 press"
             >
-              <Avatar name={profile.username || "User"} hue={200} size={48} src={profile.avatar_url} />
+              <Avatar name={displayName(profile.id, profile.username || "User")} hue={200} size={48} src={profile.avatar_url} />
               <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
-                <div className="font-semibold truncate">{profile.username || (lang === "hi" ? "उपयोगकर्ता" : "User")}</div>
+                <div className="font-semibold truncate">{displayName(profile.id, profile.username || (lang === "hi" ? "उपयोगकर्ता" : "User"))}</div>
                 <div className="text-xs text-muted-foreground truncate">
                   {profile.about || (lang === "hi" ? "चैट शुरू करने के लिए टैप करें" : "Tap to start chatting")}
                 </div>

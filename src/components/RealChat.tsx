@@ -8,6 +8,7 @@ import { Ticks } from "@/components/Ticks";
 import { fetchThread, sendDbMessage, deleteDbMessage, type DbMessage } from "@/lib/chat-db";
 import { useI18n } from "@/lib/i18n";
 import { getChatProfile } from "@/lib/profile-lookup.functions";
+import { useContactNames } from "@/lib/contact-names";
 import { notifyNewMessage } from "@/lib/push.functions";
 
 function timeOf(iso: string) {
@@ -26,6 +27,9 @@ export function RealChat({ peerId }: { peerId: string }) {
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { displayName, setContactName: saveContactName } = useContactNames();
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -36,6 +40,9 @@ export function RealChat({ peerId }: { peerId: string }) {
       online: lang === "hi" ? "ऑनलाइन" : "online",
       deleteMsg: lang === "hi" ? "संदेश हटाएँ" : "Delete message",
       cancel: lang === "hi" ? "रद्द करें" : "Cancel",
+      rename: lang === "hi" ? "नाम बदलें" : "Edit contact name",
+      renameHint: lang === "hi" ? "यह नाम सिर्फ़ आपको दिखेगा" : "This name is only visible to you",
+      save: lang === "hi" ? "सहेजें" : "Save",
     }),
     [lang],
   );
@@ -116,6 +123,8 @@ export function RealChat({ peerId }: { peerId: string }) {
     pressTimer.current = null;
   };
 
+  const shownName = displayName(peerId, peerName);
+
   const confirmDelete = async () => {
     if (!deletingId) return;
     const id = deletingId;
@@ -133,11 +142,21 @@ export function RealChat({ peerId }: { peerId: string }) {
         <button onClick={() => navigate({ to: "/home" })} className="p-1.5 rounded-full hover:bg-white/10 press" aria-label="back">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
-        <Avatar name={peerName} hue={200} size={38} src={peerAvatar} />
+        <Avatar name={shownName} hue={200} size={38} src={peerAvatar} />
         <div className="flex-1 min-w-0">
-          <div className="font-semibold leading-tight truncate">{peerName}</div>
+          <div className="font-semibold leading-tight truncate">{shownName}</div>
           <div className="text-[11px] opacity-80">{L.online}</div>
         </div>
+        <button
+          onClick={() => {
+            setNameDraft(shownName);
+            setRenaming(true);
+          }}
+          className="p-2 rounded-full hover:bg-white/10 press"
+          aria-label={L.rename}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+        </button>
       </header>
 
       <div ref={scrollerRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5">
@@ -217,6 +236,45 @@ export function RealChat({ peerId }: { peerId: string }) {
             >
               {L.cancel}
             </button>
+          </div>
+        </div>
+      )}
+
+      {renaming && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade"
+          onClick={() => setRenaming(false)}
+        >
+          <div
+            className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl p-4 anim-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="font-semibold mb-1">{L.rename}</div>
+            <p className="text-xs text-muted-foreground mb-3">{L.renameHint}</p>
+            <input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              autoFocus
+              className="w-full bg-muted rounded-xl px-3 py-2 text-sm outline-none mb-3"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRenaming(false)}
+                className="flex-1 py-2.5 rounded-full text-sm border border-border press"
+              >
+                {L.cancel}
+              </button>
+              <button
+                onClick={() => {
+                  saveContactName(peerId, nameDraft);
+                  setRenaming(false);
+                }}
+                className="flex-1 py-2.5 rounded-full text-sm text-white font-semibold shadow press"
+                style={{ background: "var(--color-primary)" }}
+              >
+                {L.save}
+              </button>
+            </div>
           </div>
         </div>
       )}
