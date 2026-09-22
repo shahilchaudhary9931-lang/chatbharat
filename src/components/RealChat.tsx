@@ -123,6 +123,8 @@ export function RealChat({ peerId }: { peerId: string }) {
     pressTimer.current = null;
   };
 
+  const shownName = displayName(peerId, peerName);
+
   const confirmDelete = async () => {
     if (!deletingId) return;
     const id = deletingId;
