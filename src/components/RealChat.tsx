@@ -239,6 +239,45 @@ export function RealChat({ peerId }: { peerId: string }) {
           </div>
         </div>
       )}
+
+      {renaming && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade"
+          onClick={() => setRenaming(false)}
+        >
+          <div
+            className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl p-4 anim-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="font-semibold mb-1">{L.rename}</div>
+            <p className="text-xs text-muted-foreground mb-3">{L.renameHint}</p>
+            <input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              autoFocus
+              className="w-full bg-muted rounded-xl px-3 py-2 text-sm outline-none mb-3"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRenaming(false)}
+                className="flex-1 py-2.5 rounded-full text-sm border border-border press"
+              >
+                {L.cancel}
+              </button>
+              <button
+                onClick={() => {
+                  saveContactName(peerId, nameDraft);
+                  setRenaming(false);
+                }}
+                className="flex-1 py-2.5 rounded-full text-sm text-white font-semibold shadow press"
+                style={{ background: "var(--color-primary)" }}
+              >
+                {L.save}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
