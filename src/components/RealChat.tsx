@@ -27,6 +27,9 @@ export function RealChat({ peerId }: { peerId: string }) {
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { displayName, setContactName: saveContactName } = useContactNames();
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,6 +40,9 @@ export function RealChat({ peerId }: { peerId: string }) {
       online: lang === "hi" ? "ऑनलाइन" : "online",
       deleteMsg: lang === "hi" ? "संदेश हटाएँ" : "Delete message",
       cancel: lang === "hi" ? "रद्द करें" : "Cancel",
+      rename: lang === "hi" ? "नाम बदलें" : "Edit contact name",
+      renameHint: lang === "hi" ? "यह नाम सिर्फ़ आपको दिखेगा" : "This name is only visible to you",
+      save: lang === "hi" ? "सहेजें" : "Save",
     }),
     [lang],
   );
