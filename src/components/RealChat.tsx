@@ -8,6 +8,7 @@ import { Ticks } from "@/components/Ticks";
 import { fetchThread, sendDbMessage, deleteDbMessage, type DbMessage } from "@/lib/chat-db";
 import { useI18n } from "@/lib/i18n";
 import { getChatProfile } from "@/lib/profile-lookup.functions";
+import { useContactNames } from "@/lib/contact-names";
 import { notifyNewMessage } from "@/lib/push.functions";
 
 function timeOf(iso: string) {
