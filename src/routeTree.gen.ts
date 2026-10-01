@@ -16,8 +16,8 @@ import { Route as HomeRouteImport } from './routes/home'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NewGroupRouteImport } from './routes/new-group'
-import { Route as OtpRouteImport } from './routes/otp'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -68,14 +68,14 @@ const NewGroupRoute = NewGroupRouteImport.update({
   path: '/new-group',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OtpRoute = OtpRouteImport.update({
-  id: '/otp',
-  path: '/otp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -160,8 +160,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/new-group': typeof NewGroupRoute
-  '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
   '/status': typeof StatusRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -185,8 +185,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/new-group': typeof NewGroupRoute
-  '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
   '/status': typeof StatusRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -211,8 +211,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/new-group': typeof NewGroupRoute
-  '/otp': typeof OtpRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
   '/status': typeof StatusRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -238,8 +238,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/mcp'
     | '/new-group'
-    | '/otp'
     | '/profile'
+    | '/reset-password'
     | '/settings'
     | '/status'
     | '/.mcp/list-tools'
@@ -263,8 +263,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/mcp'
     | '/new-group'
-    | '/otp'
     | '/profile'
+    | '/reset-password'
     | '/settings'
     | '/status'
     | '/.mcp/list-tools'
@@ -288,8 +288,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/mcp'
     | '/new-group'
-    | '/otp'
     | '/profile'
+    | '/reset-password'
     | '/settings'
     | '/status'
     | '/.mcp/list-tools'
@@ -314,8 +314,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
   NewGroupRoute: typeof NewGroupRoute
-  OtpRoute: typeof OtpRoute
   ProfileRoute: typeof ProfileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   StatusRoute: typeof StatusRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -376,18 +376,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewGroupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/otp': {
-      id: '/otp'
-      path: '/otp'
-      fullPath: '/otp'
-      preLoaderRoute: typeof OtpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -523,8 +523,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
   NewGroupRoute: NewGroupRoute,
-  OtpRoute: OtpRoute,
   ProfileRoute: ProfileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRouteWithChildren,
   StatusRoute: StatusRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
