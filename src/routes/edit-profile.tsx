@@ -26,6 +26,7 @@ function EditProfile() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
+  const [about, setAbout] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +34,7 @@ function EditProfile() {
   const L = {
     title: lang === "hi" ? "प्रोफ़ाइल संपादित करें" : "Edit Profile",
     name: lang === "hi" ? "आपका नाम" : "Your name",
+    about: lang === "hi" ? "अबाउट" : "About",
     change: lang === "hi" ? "फ़ोटो बदलें" : "Change photo",
     remove: lang === "hi" ? "फ़ोटो हटाएँ" : "Remove photo",
     save: lang === "hi" ? "सेव करें" : "Save",
@@ -47,6 +49,7 @@ function EditProfile() {
     if (!user) { navigate({ to: "/login" }); return; }
     setName(profile?.username || "");
     setPhoto(profile?.avatar_url || null);
+    setAbout(profile?.about || "");
   }, [loading, user, profile, navigate]);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +66,7 @@ function EditProfile() {
     setError(null);
     const { error: err } = await supabase
       .from("profiles")
-      .update({ username: name.trim() || null, avatar_url: photo })
+      .update({ username: name.trim() || null, avatar_url: photo, about: about.trim() || null })
       .eq("id", user.id);
     if (err) {
       setError(L.error);
@@ -120,6 +123,17 @@ function EditProfile() {
           placeholder={L.name}
         />
         <p className="text-xs text-muted-foreground mt-2">{L.nameHint}</p>
+        <label className="block mt-6 text-xs text-muted-foreground uppercase tracking-wide font-semibold" htmlFor="about">
+          {L.about}
+        </label>
+        <input
+          id="about"
+          value={about}
+          maxLength={140}
+          onChange={(e) => { setAbout(e.target.value); setSaved(false); }}
+          className="w-full mt-1 bg-transparent border-b border-border focus:border-primary outline-none py-2 text-base"
+          placeholder="Hey there! I am using ChatWave."
+        />
       </section>
 
       <div className="px-4 mt-8">

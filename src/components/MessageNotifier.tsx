@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
 import { getVapidPublicKey, savePushSubscription } from "@/lib/push.functions";
+import { startPresence } from "@/lib/presence";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -20,6 +21,12 @@ export function MessageNotifier() {
   const { user } = useAuth();
   const fetchVapidKey = useServerFn(getVapidPublicKey);
   const saveSubscription = useServerFn(savePushSubscription);
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+    return startPresence(userId);
+  }, [userId]);
 
   useEffect(() => {
     if (!user) return;

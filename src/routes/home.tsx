@@ -52,7 +52,7 @@ function Home() {
     void load();
     const channel = supabase
       .channel("home-messages")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => void load())
       .subscribe();
     return () => { active = false; void supabase.removeChannel(channel); };
   }, [user]);
@@ -166,11 +166,21 @@ function Home() {
                   <div className="flex-1 min-w-0 border-b border-border/60 pb-3 -mb-3">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold truncate">{displayName(c.peerId, c.peerName)}</span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className={`text-xs ${c.unread > 0 ? "text-primary font-semibold" : "text-muted-foreground"}`}>
                         {new Date(c.lastAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
-                    <div className="text-sm truncate text-muted-foreground mt-0.5">{c.lastMessage}</div>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <div className="text-sm truncate text-muted-foreground">{c.lastMessage}</div>
+                      {c.unread > 0 && (
+                        <span
+                          className="min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold text-white flex items-center justify-center anim-pop"
+                          style={{ background: "var(--color-unread)" }}
+                        >
+                          {c.unread}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </Link>
               </li>
