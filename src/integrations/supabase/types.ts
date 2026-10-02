@@ -14,26 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
-      messages: {
+      message_hidden: {
         Row: {
           created_at: string
-          id: string
-          message_text: string
-          receiver_id: string
-          sender_id: string
+          message_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          message_text: string
-          receiver_id: string
-          sender_id: string
+          message_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_hidden_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          attachment_name: string | null
+          attachment_path: string | null
+          attachment_type: string | null
+          created_at: string
+          deleted_for_everyone: boolean
+          id: string
+          message_text: string
+          read_at: string | null
+          receiver_id: string
+          reply_to_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          attachment_type?: string | null
+          created_at?: string
+          deleted_for_everyone?: boolean
+          id?: string
+          message_text: string
+          read_at?: string | null
+          receiver_id: string
+          reply_to_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          attachment_type?: string | null
+          created_at?: string
+          deleted_for_everyone?: boolean
           id?: string
           message_text?: string
+          read_at?: string | null
           receiver_id?: string
+          reply_to_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -42,6 +86,13 @@ export type Database = {
             columns: ["receiver_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
           {
@@ -60,6 +111,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          last_seen: string | null
           phone_number: string | null
           username: string | null
         }
@@ -69,6 +121,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
+          last_seen?: string | null
           phone_number?: string | null
           username?: string | null
         }
@@ -78,6 +131,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          last_seen?: string | null
           phone_number?: string | null
           username?: string | null
         }
@@ -110,6 +164,64 @@ export type Database = {
         }
         Relationships: []
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reported_id: string
+          reporter_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -123,6 +235,7 @@ export type Database = {
           username: string
         }[]
       }
+      is_blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
