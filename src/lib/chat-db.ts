@@ -170,3 +170,19 @@ export async function unblockUser(peerId: string) {
 export async function reportUser(peerId: string, reason: string) {
   return supabase.from("user_reports").insert({ reported_id: peerId, reason });
 }
+
+export interface Reaction { message_id: string; user_id: string; emoji: string }
+
+export async function fetchReactions(messageIds: string[]): Promise<Reaction[]> {
+  if (messageIds.length === 0) return [];
+  const { data } = await supabase.from("message_reactions").select("message_id, user_id, emoji").in("message_id", messageIds);
+  return (data as Reaction[]) ?? [];
+}
+
+export async function setReaction(messageId: string, userId: string, emoji: string) {
+  return supabase.from("message_reactions").upsert({ message_id: messageId, user_id: userId, emoji }, { onConflict: "message_id,user_id" });
+}
+
+export async function removeReaction(messageId: string, userId: string) {
+  return supabase.from("message_reactions").delete().eq("message_id", messageId).eq("user_id", userId);
+}
