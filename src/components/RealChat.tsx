@@ -21,7 +21,7 @@ import {
   previewOf,
   type DbMessage,
 } from "@/lib/chat-db";
-import { fetchReactions, setReaction, removeReaction, type Reaction } from "@/lib/chat-db";
+import { fetchReactions, setReaction, removeReaction, type Reaction, fetchPins, pinMessage, unpinMessage, type Pin } from "@/lib/chat-db";
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 import { useI18n } from "@/lib/i18n";
 import { getChatProfile } from "@/lib/profile-lookup.functions";
@@ -81,6 +81,9 @@ export function RealChat({ peerId }: { peerId: string }) {
   const pushNewMessage = useServerFn(notifyNewMessage);
   const [messages, setMessages] = useState<DbMessage[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [pins, setPins] = useState<Pin[]>([]);
+  const [pinsOpen, setPinsOpen] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
   const [peerName, setPeerName] = useState("Chat");
   const [peerAvatar, setPeerAvatar] = useState<string | null>(null);
   const [peerAbout, setPeerAbout] = useState<string | null>(null);
@@ -164,6 +167,7 @@ export function RealChat({ peerId }: { peerId: string }) {
       setBlocked(isBlocked);
       setMessages(thread);
       fetchReactions(thread.map((m) => m.id)).then((r) => active && setReactions(r));
+      fetchPins(thread.map((m) => m.id)).then((p) => active && setPins(p));
       setReady(true);
       void markThreadRead(user.id, peerId);
     })();
@@ -190,6 +194,15 @@ export function RealChat({ peerId }: { peerId: string }) {
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
         const old = payload.old as { id?: string };
         if (old?.id) setMessages((prev) => prev.filter((x) => x.id !== old.id));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_pins" }, (payload) => {
+        if (payload.eventType === "DELETE") {
+          const o = payload.old as Partial<Pin>;
+          if (o?.message_id) setPins((prev) => prev.filter((p) => p.message_id !== o.message_id));
+        } else {
+          const n = payload.new as Pin;
+          setPins((prev) => (prev.some((p) => p.message_id === n.message_id) ? prev : [...prev, n]));
+        }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, (payload) => {
         const n = payload.new as Partial<Reaction>;
@@ -312,6 +325,32 @@ export function RealChat({ peerId }: { peerId: string }) {
   const shownName = displayName(peerId, peerName);
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
 
+  const pinnedMsgs = useMemo(
+    () => pins
+      .map((p) => ({ pin: p, msg: byId.get(p.message_id) }))
+      .filter((x): x is { pin: Pin; msg: DbMessage } => !!x.msg && !x.msg.deleted_for_everyone)
+      .sort((a, b) => b.pin.created_at.localeCompare(a.pin.created_at)),
+    [pins, byId],
+  );
+  const isPinned = (id: string) => pins.some((p) => p.message_id === id);
+  const togglePin = async (id: string) => {
+    if (!user) return;
+    if (isPinned(id)) {
+      setPins((prev) => prev.filter((p) => p.message_id !== id));
+      await unpinMessage(id);
+    } else {
+      setPins((prev) => [...prev, { message_id: id, pinned_by: user.id, created_at: new Date().toISOString() }]);
+      const { error } = await pinMessage(id);
+      if (error) setPins((prev) => prev.filter((p) => p.message_id !== id));
+    }
+  };
+  const jumpTo = (id: string) => {
+    setPinsOpen(false);
+    document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightId(id);
+    setTimeout(() => setHighlightId((h) => (h === id ? null : h)), 1800);
+  };
+
   const reactionsOf = (id: string) => reactions.filter((r) => r.message_id === id);
   const toggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
@@ -402,6 +441,21 @@ export function RealChat({ peerId }: { peerId: string }) {
         </div>
       </header>
 
+      {pinnedMsgs.length > 0 && (
+        <button
+          onClick={() => (pinnedMsgs.length === 1 ? jumpTo(pinnedMsgs[0].msg.id) : setPinsOpen(true))}
+          className="shrink-0 flex items-center gap-2 px-3 py-2 bg-card border-b border-border text-left press"
+        >
+          <span className="text-base">📌</span>
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-semibold text-primary">
+              {hi ? "पिन किए गए संदेश" : "Pinned messages"}{pinnedMsgs.length > 1 ? ` (${pinnedMsgs.length})` : ""}
+            </div>
+            <div className="truncate text-xs text-muted-foreground">{previewOf(pinnedMsgs[0].msg)}</div>
+          </div>
+        </button>
+      )}
+
       <div ref={scrollerRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5" onClick={() => setMenuOpen(false)}>
         {ready && messages.length === 0 && (
           <p className="text-center text-sm text-muted-foreground py-10">{L.empty}</p>
@@ -410,7 +464,7 @@ export function RealChat({ peerId }: { peerId: string }) {
           const fromMe = m.sender_id === user?.id;
           const quoted = m.reply_to_id ? byId.get(m.reply_to_id) : undefined;
           return (
-            <div key={m.id} className={`flex ${fromMe ? "justify-end" : "justify-start"}`}>
+            <div key={m.id} id={`msg-${m.id}`} className={`flex rounded-xl transition-colors duration-500 ${highlightId === m.id ? "bg-primary/15" : ""} ${fromMe ? "justify-end" : "justify-start"}`}>
               <div
                 className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm anim-bubble select-none ${fromMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
                 style={{
@@ -440,6 +494,7 @@ export function RealChat({ peerId }: { peerId: string }) {
                   </>
                 )}
                 <span className="ml-2 inline-flex items-center gap-1 align-bottom text-[10px] text-muted-foreground">
+                  {isPinned(m.id) && !m.deleted_for_everyone && <span aria-label="pinned">📌</span>}
                   {timeOf(m.created_at)}
                   {fromMe && !m.deleted_for_everyone && <Ticks status={m.read_at ? "seen" : "delivered"} />}
                 </span>
@@ -524,6 +579,29 @@ export function RealChat({ peerId }: { peerId: string }) {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full bg-foreground text-background text-xs px-4 py-2 shadow anim-pop">{toast}</div>
       )}
 
+      {pinsOpen && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade" onClick={() => setPinsOpen(false)}>
+          <div className="w-full max-w-sm m-3 max-h-[70dvh] flex flex-col rounded-2xl bg-card border border-border shadow-xl overflow-hidden anim-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-4 py-3 text-sm font-semibold border-b border-border">📌 {hi ? "पिन किए गए संदेश" : "Pinned messages"}</div>
+            <div className="overflow-y-auto">
+              {pinnedMsgs.map(({ msg }) => (
+                <div key={msg.id} className="flex items-center gap-2 px-4 py-3 border-b border-border last:border-b-0">
+                  <button onClick={() => jumpTo(msg.id)} className="min-w-0 flex-1 text-left press">
+                    <div className="text-[11px] font-semibold text-primary">
+                      {msg.sender_id === user?.id ? L.you : shownName} · {timeOf(msg.created_at)}
+                    </div>
+                    <div className="truncate text-sm">{previewOf(msg)}</div>
+                  </button>
+                  <button onClick={() => void togglePin(msg.id)} className="text-xs text-muted-foreground px-2 py-1 press">
+                    {hi ? "अनपिन" : "Unpin"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {actionMsg && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade" onClick={() => setActionMsg(null)}>
           <div className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl overflow-hidden anim-slide-up" onClick={(e) => e.stopPropagation()}>
@@ -546,6 +624,12 @@ export function RealChat({ peerId }: { peerId: string }) {
               className="w-full px-4 py-3.5 text-sm font-semibold hover:bg-muted/60 press"
             >
               ↩ {L.reply}
+            </button>
+            <button
+              onClick={() => { void togglePin(actionMsg.id); setActionMsg(null); }}
+              className="w-full px-4 py-3.5 text-sm font-semibold hover:bg-muted/60 press border-t border-border"
+            >
+              📌 {isPinned(actionMsg.id) ? (hi ? "अनपिन करें" : "Unpin") : (hi ? "पिन करें" : "Pin")}
             </button>
             <button onClick={() => void doDeleteForMe()} className="w-full px-4 py-3.5 text-sm text-destructive hover:bg-muted/60 press border-t border-border">
               {L.delMe}

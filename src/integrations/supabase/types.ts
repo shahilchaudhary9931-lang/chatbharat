@@ -40,6 +40,32 @@ export type Database = {
           },
         ]
       }
+      message_pins: {
+        Row: {
+          created_at: string
+          message_id: string
+          pinned_by: string
+        }
+        Insert: {
+          created_at?: string
+          message_id: string
+          pinned_by?: string
+        }
+        Update: {
+          created_at?: string
+          message_id?: string
+          pinned_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_pins_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: true
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_reactions: {
         Row: {
           created_at: string
