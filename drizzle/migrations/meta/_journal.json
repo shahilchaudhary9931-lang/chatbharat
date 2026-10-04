@@ -15,6 +15,13 @@
       "when": 1791132929550,
       "tag": "0001_message_reactions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791133112557,
+      "tag": "0002_message_pins",
+      "breakpoints": true
     }
   ]
 }

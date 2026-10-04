@@ -186,3 +186,17 @@ export async function setReaction(messageId: string, userId: string, emoji: stri
 export async function removeReaction(messageId: string, userId: string) {
   return supabase.from("message_reactions").delete().eq("message_id", messageId).eq("user_id", userId);
 }
+
+export interface Pin { message_id: string; pinned_by: string; created_at: string }
+
+export async function fetchPins(messageIds: string[]): Promise<Pin[]> {
+  if (messageIds.length === 0) return [];
+  const { data } = await supabase.from("message_pins").select("message_id, pinned_by, created_at").in("message_id", messageIds);
+  return (data as Pin[]) ?? [];
+}
+export async function pinMessage(messageId: string) {
+  return supabase.from("message_pins").insert({ message_id: messageId });
+}
+export async function unpinMessage(messageId: string) {
+  return supabase.from("message_pins").delete().eq("message_id", messageId);
+}
