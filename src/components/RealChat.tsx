@@ -21,6 +21,8 @@ import {
   previewOf,
   type DbMessage,
 } from "@/lib/chat-db";
+import { fetchReactions, setReaction, removeReaction, type Reaction } from "@/lib/chat-db";
+const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 import { useI18n } from "@/lib/i18n";
 import { getChatProfile } from "@/lib/profile-lookup.functions";
 import { useContactNames } from "@/lib/contact-names";
@@ -78,6 +80,7 @@ export function RealChat({ peerId }: { peerId: string }) {
   const fetchChatProfile = useServerFn(getChatProfile);
   const pushNewMessage = useServerFn(notifyNewMessage);
   const [messages, setMessages] = useState<DbMessage[]>([]);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
   const [peerName, setPeerName] = useState("Chat");
   const [peerAvatar, setPeerAvatar] = useState<string | null>(null);
   const [peerAbout, setPeerAbout] = useState<string | null>(null);
@@ -160,6 +163,7 @@ export function RealChat({ peerId }: { peerId: string }) {
       setPeerLastSeen(prof?.last_seen ?? null);
       setBlocked(isBlocked);
       setMessages(thread);
+      fetchReactions(thread.map((m) => m.id)).then((r) => active && setReactions(r));
       setReady(true);
       void markThreadRead(user.id, peerId);
     })();
@@ -186,6 +190,19 @@ export function RealChat({ peerId }: { peerId: string }) {
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
         const old = payload.old as { id?: string };
         if (old?.id) setMessages((prev) => prev.filter((x) => x.id !== old.id));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, (payload) => {
+        const n = payload.new as Partial<Reaction>;
+        const o = payload.old as Partial<Reaction>;
+        setReactions((prev) => {
+          let next = prev;
+          if (o?.message_id && o.user_id) next = next.filter((r) => !(r.message_id === o.message_id && r.user_id === o.user_id));
+          if (payload.eventType !== "DELETE" && n?.message_id && n.user_id && n.emoji) {
+            next = next.filter((r) => !(r.message_id === n.message_id && r.user_id === n.user_id));
+            next = [...next, n as Reaction];
+          }
+          return next;
+        });
       })
       .subscribe();
 
@@ -294,6 +311,20 @@ export function RealChat({ peerId }: { peerId: string }) {
 
   const shownName = displayName(peerId, peerName);
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
+
+  const reactionsOf = (id: string) => reactions.filter((r) => r.message_id === id);
+  const toggleReaction = async (messageId: string, emoji: string) => {
+    if (!user) return;
+    const mine = reactions.find((r) => r.message_id === messageId && r.user_id === user.id);
+    const others = reactions.filter((r) => !(r.message_id === messageId && r.user_id === user.id));
+    if (mine?.emoji === emoji) {
+      setReactions(others);
+      await removeReaction(messageId, user.id);
+    } else {
+      setReactions([...others, { message_id: messageId, user_id: user.id, emoji }]);
+      await setReaction(messageId, user.id, emoji);
+    }
+  };
 
   const doDeleteForMe = async () => {
     if (!actionMsg) return;
@@ -412,6 +443,17 @@ export function RealChat({ peerId }: { peerId: string }) {
                   {timeOf(m.created_at)}
                   {fromMe && !m.deleted_for_everyone && <Ticks status={m.read_at ? "seen" : "delivered"} />}
                 </span>
+                {!m.deleted_for_everyone && reactionsOf(m.id).length > 0 && (
+                  <div className={`-mb-4 mt-1 flex ${fromMe ? "justify-end" : "justify-start"}`}>
+                    <button
+                      onClick={() => setActionMsg(m)}
+                      className="inline-flex items-center gap-0.5 rounded-full bg-card border border-border px-1.5 py-0.5 text-xs shadow-sm anim-pop"
+                    >
+                      {[...new Set(reactionsOf(m.id).map((r) => r.emoji))].join("")}
+                      {reactionsOf(m.id).length > 1 && <span className="text-[10px] text-muted-foreground ml-0.5">{reactionsOf(m.id).length}</span>}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -485,6 +527,20 @@ export function RealChat({ peerId }: { peerId: string }) {
       {actionMsg && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 anim-fade" onClick={() => setActionMsg(null)}>
           <div className="w-full max-w-sm m-3 rounded-2xl bg-card border border-border shadow-xl overflow-hidden anim-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-around px-2 py-3 border-b border-border">
+              {REACTION_EMOJIS.map((e) => {
+                const active = reactions.some((r) => r.message_id === actionMsg.id && r.user_id === user?.id && r.emoji === e);
+                return (
+                  <button
+                    key={e}
+                    onClick={() => { void toggleReaction(actionMsg.id, e); setActionMsg(null); }}
+                    className={`text-2xl rounded-full w-11 h-11 press ${active ? "bg-primary/15" : ""}`}
+                  >
+                    {e}
+                  </button>
+                );
+              })}
+            </div>
             <button
               onClick={() => { setReplyTo(actionMsg); setActionMsg(null); }}
               className="w-full px-4 py-3.5 text-sm font-semibold hover:bg-muted/60 press"

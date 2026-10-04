@@ -8,6 +8,13 @@
       "when": 1790938515622,
       "tag": "0000_chat_features",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791132929550,
+      "tag": "0001_message_reactions",
+      "breakpoints": true
     }
   ]
 }
