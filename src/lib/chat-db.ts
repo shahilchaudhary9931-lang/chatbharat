@@ -35,6 +35,7 @@ async function hiddenIds(): Promise<Set<string>> {
 
 export function previewOf(m: Pick<DbMessage, "message_text" | "attachment_type" | "attachment_name" | "deleted_for_everyone">) {
   if (m.deleted_for_everyone) return "🚫 This message was deleted";
+  if (m.attachment_type?.startsWith("audio/")) return "🎤 Voice message";
   if (m.attachment_type?.startsWith("image/")) return "📷 " + (m.message_text || "Photo");
   if (m.attachment_type) return "📄 " + (m.attachment_name || "File");
   return m.message_text;

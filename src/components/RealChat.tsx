@@ -28,6 +28,7 @@ import { getChatProfile } from "@/lib/profile-lookup.functions";
 import { useContactNames } from "@/lib/contact-names";
 import { notifyNewMessage } from "@/lib/push.functions";
 import { useIsOnline } from "@/lib/presence";
+import { VoicePlayer, VoiceRecorder } from "@/components/VoiceNote";
 
 function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -48,6 +49,7 @@ function Attachment({ m }: { m: DbMessage }) {
     if (m.attachment_path) void attachmentUrl(m.attachment_path).then(setUrl);
   }, [m.attachment_path]);
   if (!m.attachment_path) return null;
+  if (m.attachment_type?.startsWith("audio/")) return <VoicePlayer src={url} />;
   if (m.attachment_type?.startsWith("image/")) {
     return url ? (
       <a href={url} target="_blank" rel="noreferrer" className="block mb-1">
@@ -314,6 +316,27 @@ export function RealChat({ peerId }: { peerId: string }) {
     }
   };
 
+  const sendVoice = async (file: File) => {
+    if (!user || blocked) return;
+    try {
+      const path = await uploadAttachment(user.id, file);
+      const reply = replyTo;
+      setReplyTo(null);
+      const { data, error } = await sendDbMessage(user.id, peerId, "", {
+        reply_to_id: reply?.id ?? null,
+        attachment_path: path,
+        attachment_name: file.name,
+        attachment_type: file.type || "audio/webm",
+      });
+      if (error) throw error;
+      await afterSend(data, "🎤 Voice message");
+    } catch (err) {
+      console.error("Voice upload failed", err);
+      flash(L.cantSend);
+      throw err;
+    }
+  };
+
   const startPress = (m: DbMessage) => {
     pressTimer.current = setTimeout(() => setActionMsg(m), 450);
   };
@@ -539,7 +562,7 @@ export function RealChat({ peerId }: { peerId: string }) {
               <button onClick={() => setReplyTo(null)} className="p-1 text-muted-foreground" aria-label={L.cancel}>✕</button>
             </div>
           )}
-          <div className="flex items-end gap-2">
+          <div className="relative flex items-end gap-2">
             <div className="flex-1 flex items-center bg-card rounded-full px-3 py-2 shadow-sm border border-border gap-2">
               <input
                 value={draft}
@@ -563,14 +586,18 @@ export function RealChat({ peerId }: { peerId: string }) {
                 onChange={(e) => void onPickFile(e)}
               />
             </div>
-            <button
-              onClick={() => void send()}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow press"
-              style={{ background: "var(--color-primary)" }}
-              aria-label="send"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7Z" /></svg>
-            </button>
+            {draft.trim() ? (
+              <button
+                onClick={() => void send()}
+                className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow press"
+                style={{ background: "var(--color-primary)" }}
+                aria-label="send"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7Z" /></svg>
+              </button>
+            ) : (
+              <VoiceRecorder disabled={uploading || blocked} hi={lang === "hi"} onSend={sendVoice} onError={flash} />
+            )}
           </div>
         </div>
       )}
