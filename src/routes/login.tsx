@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -89,6 +90,23 @@ function Login() {
       if (data.session) navigate({ to: "/home" });
       else setInfo(hi ? "अपना ईमेल देखें और खाते की पुष्टि करें, फिर लॉगिन करें।" : "Check your email to confirm your account, then log in.");
     }
+  };
+
+  const onGoogle = async () => {
+    setError(null);
+    setInfo(null);
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      setBusy(false);
+      setError(result.error.message);
+      return;
+    }
+    if (result.redirected) return;
+    setBusy(false);
+    navigate({ to: "/home" });
   };
 
   const onForgot = async () => {
