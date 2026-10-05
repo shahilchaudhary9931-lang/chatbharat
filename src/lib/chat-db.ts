@@ -50,12 +50,23 @@ export async function fetchConversations(userId: string): Promise<Conversation[]
 
   const byPeer = new Map<string, DbMessage>();
   const unread = new Map<string, number>();
+  const clearedPeers = new Map<string, DbMessage>();
   for (const m of msgs as DbMessage[]) {
-    if (hidden.has(m.id)) continue;
     const peer = m.sender_id === userId ? m.receiver_id : m.sender_id;
+    if (hidden.has(m.id)) {
+      if (!clearedPeers.has(peer)) clearedPeers.set(peer, m);
+      continue;
+    }
     if (!byPeer.has(peer)) byPeer.set(peer, m);
     if (m.receiver_id === userId && !m.read_at && !m.deleted_for_everyone) {
       unread.set(peer, (unread.get(peer) ?? 0) + 1);
+    }
+  }
+  const clearedOnly = new Set<string>();
+  for (const [peer, m] of clearedPeers) {
+    if (!byPeer.has(peer)) {
+      byPeer.set(peer, m);
+      clearedOnly.add(peer);
     }
   }
   const peerIds = [...byPeer.keys()];
@@ -74,7 +85,7 @@ export async function fetchConversations(userId: string): Promise<Conversation[]
       peerId,
       peerName: p?.username || p?.email || "Unknown",
       peerAvatar: p?.avatar_url ?? null,
-      lastMessage: previewOf(m),
+      lastMessage: clearedOnly.has(peerId) ? "" : previewOf(m),
       lastAt: m.created_at,
       unread: unread.get(peerId) ?? 0,
     };
@@ -138,6 +149,17 @@ export async function markThreadRead(userId: string, peerId: string) {
 
 export async function hideMessageForMe(id: string) {
   return supabase.from("message_hidden").insert({ message_id: id });
+}
+
+/** Clear chat for the current user only (hides every message in the thread). */
+export async function clearChatForMe(ids: string[]) {
+  for (let i = 0; i < ids.length; i += 200) {
+    const { error } = await supabase
+      .from("message_hidden")
+      .insert(ids.slice(i, i + 200).map((message_id) => ({ message_id })));
+    if (error) return { error };
+  }
+  return { error: null };
 }
 
 export async function deleteForEveryone(id: string) {
