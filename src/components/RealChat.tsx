@@ -13,6 +13,7 @@ import {
   attachmentUrl,
   markThreadRead,
   hideMessageForMe,
+  clearChatForMe,
   deleteForEveryone,
   isBlockedByMe,
   blockUser,
@@ -98,6 +99,8 @@ export function RealChat({ peerId }: { peerId: string }) {
   const [uploading, setUploading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -405,6 +408,19 @@ export function RealChat({ peerId }: { peerId: string }) {
     await deleteForEveryone(id);
   };
 
+  const doClearChat = async () => {
+    setClearing(true);
+    const ids = messages.map((m) => m.id);
+    const { error } = await clearChatForMe(ids);
+    setClearing(false);
+    setConfirmClear(false);
+    if (error) {
+      flash(hi ? "चैट साफ़ नहीं हो सकी" : "Couldn't clear chat");
+      return;
+    }
+    setMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+  };
+
   const toggleBlock = async () => {
     setMenuOpen(false);
     if (blocked) {
@@ -457,8 +473,27 @@ export function RealChat({ peerId }: { peerId: string }) {
           {menuOpen && (
             <div className="absolute right-0 top-11 w-48 rounded-xl bg-card text-foreground border border-border shadow-xl overflow-hidden anim-pop z-30">
               <button onClick={() => { setMenuOpen(false); setShowInfo(true); }} className="w-full text-left px-4 py-3 text-sm hover:bg-muted/60">{L.info}</button>
+              <button onClick={() => { setMenuOpen(false); setConfirmClear(true); }} className="w-full text-left px-4 py-3 text-sm hover:bg-muted/60">{hi ? "चैट साफ़ करें" : "Clear chat"}</button>
               <button onClick={() => void toggleBlock()} className="w-full text-left px-4 py-3 text-sm hover:bg-muted/60">{blocked ? L.unblock : L.block}</button>
               <button onClick={() => { setMenuOpen(false); setReporting(true); }} className="w-full text-left px-4 py-3 text-sm text-destructive hover:bg-muted/60">{L.report}</button>
+            </div>
+          )}
+          {confirmClear && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6" onClick={() => !clearing && setConfirmClear(false)}>
+              <div className="w-full max-w-sm rounded-2xl bg-card text-foreground p-5 shadow-2xl anim-pop" onClick={(e) => e.stopPropagation()}>
+                <div className="font-semibold text-base mb-2">{hi ? "यह चैट साफ़ करें?" : "Clear this chat?"}</div>
+                <p className="text-sm text-muted-foreground mb-5">
+                  {hi
+                    ? "सभी संदेश सिर्फ़ आपके लिए हटा दिए जाएँगे। सामने वाले व्यक्ति के पास संदेश बने रहेंगे।"
+                    : "All messages will be removed for you only. The other person will still see them."}
+                </p>
+                <div className="flex justify-end gap-2">
+                  <button disabled={clearing} onClick={() => setConfirmClear(false)} className="px-4 py-2 rounded-full text-sm hover:bg-muted/60">{hi ? "रद्द करें" : "Cancel"}</button>
+                  <button disabled={clearing} onClick={() => void doClearChat()} className="px-4 py-2 rounded-full text-sm bg-destructive text-destructive-foreground disabled:opacity-60">
+                    {clearing ? "…" : hi ? "साफ़ करें" : "Clear chat"}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
