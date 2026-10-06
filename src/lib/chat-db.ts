@@ -29,8 +29,17 @@ export interface Conversation {
 }
 
 async function hiddenIds(): Promise<Set<string>> {
-  const { data } = await supabase.from("message_hidden").select("message_id").limit(2000);
-  return new Set((data ?? []).map((r) => r.message_id));
+  const hidden = new Set<string>();
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase
+      .from("message_hidden")
+      .select("message_id")
+      .range(offset, offset + 999);
+    if (error || !data) break;
+    for (const row of data) hidden.add(row.message_id);
+    if (data.length < 1000) break;
+  }
+  return hidden;
 }
 
 export function previewOf(m: Pick<DbMessage, "message_text" | "attachment_type" | "attachment_name" | "deleted_for_everyone">) {
