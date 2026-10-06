@@ -409,16 +409,19 @@ export function RealChat({ peerId }: { peerId: string }) {
   };
 
   const doClearChat = async () => {
+    if (!user) return;
     setClearing(true);
-    const ids = messages.map((m) => m.id);
-    const { error } = await clearChatForMe(ids);
+    const { error, ids } = await clearChatForMe(user.id, peerId);
     setClearing(false);
     setConfirmClear(false);
     if (error) {
       flash(hi ? "चैट साफ़ नहीं हो सकी" : "Couldn't clear chat");
       return;
     }
-    setMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+    const cleared = new Set(ids);
+    setMessages((prev) => prev.filter((m) => !cleared.has(m.id)));
+    setReactions((prev) => prev.filter((r) => !cleared.has(r.message_id)));
+    setPins((prev) => prev.filter((p) => !cleared.has(p.message_id)));
   };
 
   const toggleBlock = async () => {
