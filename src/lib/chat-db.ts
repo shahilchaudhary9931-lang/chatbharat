@@ -29,8 +29,17 @@ export interface Conversation {
 }
 
 async function hiddenIds(): Promise<Set<string>> {
-  const { data } = await supabase.from("message_hidden").select("message_id").limit(2000);
-  return new Set((data ?? []).map((r) => r.message_id));
+  const hidden = new Set<string>();
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase
+      .from("message_hidden")
+      .select("message_id")
+      .range(offset, offset + 999);
+    if (error || !data) break;
+    for (const row of data) hidden.add(row.message_id);
+    if (data.length < 1000) break;
+  }
+  return hidden;
 }
 
 export function previewOf(m: Pick<DbMessage, "message_text" | "attachment_type" | "attachment_name" | "deleted_for_everyone">) {
@@ -151,15 +160,42 @@ export async function hideMessageForMe(id: string) {
   return supabase.from("message_hidden").insert({ message_id: id });
 }
 
-/** Clear chat for the current user only (hides every message in the thread). */
-export async function clearChatForMe(ids: string[]) {
-  for (let i = 0; i < ids.length; i += 200) {
+/** Hide the complete thread for the signed-in user without deleting shared messages. */
+export async function clearChatForMe(userId: string, peerId: string) {
+  const threadIds: string[] = [];
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("id")
+      .or(
+        `and(sender_id.eq.${userId},receiver_id.eq.${peerId}),and(sender_id.eq.${peerId},receiver_id.eq.${userId})`,
+      )
+      .order("created_at", { ascending: true })
+      .range(offset, offset + 999);
+    if (error) return { error, ids: [] as string[] };
+    threadIds.push(...(data ?? []).map((message) => message.id));
+    if (!data || data.length < 1000) break;
+  }
+
+  const hiddenIds = new Set<string>();
+  for (let i = 0; i < threadIds.length; i += 500) {
+    const batch = threadIds.slice(i, i + 500);
+    const { data, error } = await supabase
+      .from("message_hidden")
+      .select("message_id")
+      .in("message_id", batch);
+    if (error) return { error, ids: [] as string[] };
+    for (const row of data ?? []) hiddenIds.add(row.message_id);
+  }
+
+  const idsToHide = threadIds.filter((id) => !hiddenIds.has(id));
+  for (let i = 0; i < idsToHide.length; i += 200) {
     const { error } = await supabase
       .from("message_hidden")
-      .insert(ids.slice(i, i + 200).map((message_id) => ({ message_id })));
-    if (error) return { error };
+      .insert(idsToHide.slice(i, i + 200).map((message_id) => ({ message_id })));
+    if (error) return { error, ids: [] as string[] };
   }
-  return { error: null };
+  return { error: null, ids: threadIds };
 }
 
 export async function deleteForEveryone(id: string) {
