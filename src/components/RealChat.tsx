@@ -201,12 +201,13 @@ export function RealChat({ peerId }: { peerId: string }) {
         if (old?.id) setMessages((prev) => prev.filter((x) => x.id !== old.id));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "message_pins" }, (payload) => {
+        const samePin = (p: Pin, id?: string, by?: string) => p.message_id === id && p.pinned_by === by;
         if (payload.eventType === "DELETE") {
           const o = payload.old as Partial<Pin>;
-          if (o?.message_id) setPins((prev) => prev.filter((p) => p.message_id !== o.message_id));
+          setPins((prev) => prev.filter((p) => !samePin(p, o.message_id, o.pinned_by)));
         } else {
           const n = payload.new as Pin;
-          setPins((prev) => (prev.some((p) => p.message_id === n.message_id) ? prev : [...prev, n]));
+          setPins((prev) => (prev.some((p) => samePin(p, n.message_id, n.pinned_by)) ? prev : [...prev, n]));
         }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, (payload) => {
@@ -359,15 +360,16 @@ export function RealChat({ peerId }: { peerId: string }) {
     [pins, byId],
   );
   const isPinned = (id: string) => pins.some((p) => p.message_id === id);
+  const myPin = (id: string) => pins.find((p) => p.message_id === id && p.pinned_by === user?.id);
   const togglePin = async (id: string) => {
     if (!user) return;
-    if (isPinned(id)) {
-      setPins((prev) => prev.filter((p) => p.message_id !== id));
-      await unpinMessage(id);
+    if (myPin(id)) {
+      setPins((prev) => prev.filter((p) => !(p.message_id === id && p.pinned_by === user.id)));
+      await unpinMessage(id, user.id);
     } else {
       setPins((prev) => [...prev, { message_id: id, pinned_by: user.id, created_at: new Date().toISOString() }]);
       const { error } = await pinMessage(id);
-      if (error) setPins((prev) => prev.filter((p) => p.message_id !== id));
+      if (error) setPins((prev) => prev.filter((p) => !(p.message_id === id && p.pinned_by === user.id)));
     }
   };
   const jumpTo = (id: string) => {
@@ -384,10 +386,12 @@ export function RealChat({ peerId }: { peerId: string }) {
     const others = reactions.filter((r) => !(r.message_id === messageId && r.user_id === user.id));
     if (mine?.emoji === emoji) {
       setReactions(others);
-      await removeReaction(messageId, user.id);
+      const { error } = await removeReaction(messageId, user.id);
+      if (error) setReactions((prev) => [...prev, mine]);
     } else {
       setReactions([...others, { message_id: messageId, user_id: user.id, emoji }]);
-      await setReaction(messageId, user.id, emoji);
+      const { error } = await setReaction(messageId, user.id, emoji);
+      if (error) setReactions(others);
     }
   };
 
@@ -694,7 +698,7 @@ export function RealChat({ peerId }: { peerId: string }) {
               onClick={() => { void togglePin(actionMsg.id); setActionMsg(null); }}
               className="w-full px-4 py-3.5 text-sm font-semibold hover:bg-muted/60 press border-t border-border"
             >
-              📌 {isPinned(actionMsg.id) ? (hi ? "अनपिन करें" : "Unpin") : (hi ? "पिन करें" : "Pin")}
+              📌 {myPin(actionMsg.id) ? (hi ? "अनपिन करें" : "Unpin") : (hi ? "पिन करें" : "Pin")}
             </button>
             <button onClick={() => void doDeleteForMe()} className="w-full px-4 py-3.5 text-sm text-destructive hover:bg-muted/60 press border-t border-border">
               {L.delMe}
