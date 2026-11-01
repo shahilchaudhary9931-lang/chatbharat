@@ -157,7 +157,9 @@ export async function markThreadRead(userId: string, peerId: string) {
 }
 
 export async function hideMessageForMe(id: string) {
-  return supabase.from("message_hidden").insert({ message_id: id });
+  return supabase
+    .from("message_hidden")
+    .upsert({ message_id: id }, { onConflict: "user_id,message_id", ignoreDuplicates: true });
 }
 
 /** Hide the complete thread for the signed-in user without deleting shared messages. */
@@ -192,7 +194,10 @@ export async function clearChatForMe(userId: string, peerId: string) {
   for (let i = 0; i < idsToHide.length; i += 200) {
     const { error } = await supabase
       .from("message_hidden")
-      .insert(idsToHide.slice(i, i + 200).map((message_id) => ({ message_id })));
+      .upsert(idsToHide.slice(i, i + 200).map((message_id) => ({ message_id })), {
+        onConflict: "user_id,message_id",
+        ignoreDuplicates: true,
+      });
     if (error) return { error, ids: [] as string[] };
   }
   return { error: null, ids: threadIds };
@@ -254,8 +259,10 @@ export async function fetchPins(messageIds: string[]): Promise<Pin[]> {
   return (data as Pin[]) ?? [];
 }
 export async function pinMessage(messageId: string) {
-  return supabase.from("message_pins").insert({ message_id: messageId });
+  return supabase
+    .from("message_pins")
+    .upsert({ message_id: messageId }, { onConflict: "message_id,pinned_by", ignoreDuplicates: true });
 }
-export async function unpinMessage(messageId: string) {
-  return supabase.from("message_pins").delete().eq("message_id", messageId);
+export async function unpinMessage(messageId: string, userId: string) {
+  return supabase.from("message_pins").delete().eq("message_id", messageId).eq("pinned_by", userId);
 }
