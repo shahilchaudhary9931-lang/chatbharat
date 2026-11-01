@@ -60,7 +60,7 @@ export type Database = {
           {
             foreignKeyName: "message_pins_message_id_fkey"
             columns: ["message_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "messages"
             referencedColumns: ["id"]
           },
