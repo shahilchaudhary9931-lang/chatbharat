@@ -36,6 +36,13 @@
       "when": 1794200037712,
       "tag": "0004_secure_chat_message_and_media_access",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794200130282,
+      "tag": "0005_fix_chat_reply_attachment_policy_scoping",
+      "breakpoints": true
     }
   ]
 }
