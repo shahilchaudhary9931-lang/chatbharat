@@ -209,16 +209,12 @@ export async function deleteForEveryone(id: string) {
 
 /** Kept for compatibility (hard delete). */
 export async function deleteDbMessage(id: string) {
-  return supabase.from("messages").delete().eq("id", id);
+  return hideMessageForMe(id);
 }
 
 export async function deleteConversation(userId: string, peerId: string) {
-  return supabase
-    .from("messages")
-    .delete()
-    .or(
-      `and(sender_id.eq.${userId},receiver_id.eq.${peerId}),and(sender_id.eq.${peerId},receiver_id.eq.${userId})`,
-    );
+  const { error } = await clearChatForMe(userId, peerId);
+  return { error };
 }
 
 export async function isBlockedByMe(peerId: string) {
