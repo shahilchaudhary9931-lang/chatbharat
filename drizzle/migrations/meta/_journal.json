@@ -29,6 +29,13 @@
       "when": 1793521720646,
       "tag": "0003_per_user_message_pins",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794200037712,
+      "tag": "0004_secure_chat_message_and_media_access",
+      "breakpoints": true
     }
   ]
 }
