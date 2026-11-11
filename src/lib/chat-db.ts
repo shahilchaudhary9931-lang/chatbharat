@@ -207,7 +207,7 @@ export async function deleteForEveryone(id: string) {
   return supabase.from("messages").update({ deleted_for_everyone: true }).eq("id", id);
 }
 
-/** Kept for compatibility (hard delete). */
+/** Kept for compatibility; message removal is now scoped to the current user. */
 export async function deleteDbMessage(id: string) {
   return hideMessageForMe(id);
 }
