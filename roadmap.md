@@ -6,3 +6,5 @@
 - [ ] Implement targeted safe performance improvements without changing features or UI.
 - [ ] Apply and verify any justified database indexes.
 - [ ] Validate type/build diagnostics and inspect the completed roadmap.
+- [ ] Add instant optimistic sending with clear pending/confirmed/failed states, invite links and profile QR sharing, and client-side photo compression without changing existing data or security rules.
+- [ ] Verify invite-to-chat flow, optimistic send behavior, photo compression fallback, and build diagnostics.
